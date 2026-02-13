@@ -105,7 +105,6 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
   gap: 2rem;
-  transition: all 0.3s ease-in-out;
 }
 
 .pokemon-card {
