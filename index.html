@@ -1,170 +1,61 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-lang="title">도감 | TinyDex</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Guide</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <a class="brand" href="#" id="homeBtn" aria-label="Home">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>TinyDex</h1>
-          <p data-lang="subtitle">귀여운 게임 도감</p>
+    <div class="container">
+        <header class="header">
+            <h1 data-translate-key="title">Heartopia Field Guide</h1>
+            <div class="language-switcher">
+                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="ko">KO</button>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="filters">
+                <button class="filter-btn" data-category="fish" data-translate-key="category_fish">Fish</button>
+                <button class="filter-btn" data-category="insect" data-translate-key="category_insect">Insect</button>
+                <button class="filter-btn" data-category="bird" data-translate-key="category_bird">Bird</button>
+            </div>
+            <button id="add-guide-btn" data-translate-key="addGuideBtn">Add New Guide</button>
         </div>
-      </a>
 
-      <div class="actions">
-        <div class="pill" title="검색">
-          🔎
-          <input id="searchInput" data-lang="search_placeholder" placeholder="이름 / 태그로 검색… (예: 버섯, 힐러, 불)" />
-          <span class="kbd">Ctrl + K</span>
+        <div class="pokedex-container" id="pokedex">
+            <!-- Creature cards will be inserted here -->
         </div>
-
-        <select id="attrFilter" class="select" title="속성 필터">
-          <option value="all" data-lang="attr_filter">속성: 전체</option>
-          <option value="불" data-lang="attr_fire">불</option>
-          <option value="물" data-lang="attr_water">물</option>
-          <option value="바람" data-lang="attr_wind">바람</option>
-          <option value="땅" data-lang="attr_earth">땅</option>
-          <option value="빛" data-lang="attr_light">빛</option>
-          <option value="어둠" data-lang="attr_dark">어둠</option>
-        </select>
-
-        <button class="btn" id="randomBtn" data-lang="random_btn">랜덤 보기 ✨</button>
-        <button class="btn" id="addGuideBtn" data-lang="add_guide_btn">새 도감 추가 ➕</button>
-        <button class="btn" id="langBtn">EN / KO</button>
-      </div>
-    </header>
-
-    <section class="hero">
-      <div class="panel">
-        <h2 data-lang="hero_title">도감이 완성될수록 마을이 커져요 🌱</h2>
-        <p data-lang="hero_p">
-          카드형 도감 + 검색/필터 + 상세 모달까지 포함한 디자인 템플릿이에요.
-          아래 예시 데이터만 바꾸면 바로 게임 느낌으로 확장할 수 있어요.
-        </p>
-        <div class="stats">
-          <div class="chip"><span class="dot"></span><span data-lang="found_friends">발견한 친구:</span> <b id="foundCount">0</b></div>
-          <div class="chip"><span class="dot pink"></span><span data-lang="rare_friends">희귀:</span> <b id="rareCount">0</b></div>
-          <div class="chip"><span class="dot gray"></span><span data-lang="total_friends">전체:</span> <b id="totalCount">0</b></div>
-        </div>
-      </div>
-
-      <div class="side">
-        <div class="notice">
-          <div class="badge"><span>💡</span></div>
-          <div>
-            <h3 data-lang="notice1_h3">구독/좋아요 유도 문구도 넣기 쉬움</h3>
-            <small data-lang="notice1_small">
-              예: “도감 100% 달성하면 특별 스킨 공개!” 같은 이벤트 문구를
-              여기 공지 박스에 넣어두면 좋음.
-            </small>
-          </div>
-        </div>
-        <div class="notice">
-          <div class="badge"><span>🧩</span></div>
-          <div>
-            <h3 data-lang="notice2_h3">확장 아이디어</h3>
-            <small data-lang="notice2_small">
-              “획득처/드랍률/출현 시간대/진화 트리/보이스” 섹션을
-              모달에 더 붙이면 완전 게임 도감 느낌!
-            </small>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="gridHead">
-      <h3 data-lang="grid_head_h3">도감 목록</h3>
-      <div class="count"><span id="visibleCount">0</span><span data-lang="grid_head_count">개 표시중</span></div>
     </div>
 
-    <section class="grid" id="grid"></section>
-
-    <footer data-lang="footer_text">
-      © TinyDex UI — 자유롭게 수정해서 게임 도감 UI로 쓰세요.
-    </footer>
-  </div>
-
-  <!-- Detail Modal -->
-  <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" role="document">
-      <div class="modalTop">
-        <div class="modalTitle">
-          <div class="emoji" id="mEmoji">🙂</div>
-          <div>
-            <b id="mName">이름</b>
-            <div id="mMeta">#000 · 속성 · 역할</div>
-          </div>
+    <div class="modal" id="add-guide-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 data-translate-key="addGuideTitle">Add a New Creature Guide</h2>
+            <form id="add-guide-form">
+                <input type="text" id="creature-name" data-translate-key-placeholder="creatureNameLabel" placeholder="Creature Name" required>
+                <select id="creature-category" required>
+                    <option value="fish" data-translate-key="category_fish">Fish</option>
+                    <option value="insect" data-translate-key="category_insect">Insect</option>
+                    <option value="bird" data-translate-key="category_bird">Bird</option>
+                </select>
+                <input type="text" id="creature-region" data-translate-key-placeholder="regionLabel" placeholder="Region">
+                <input type="text" id="creature-sub-region" data-translate-key-placeholder="subRegionLabel" placeholder="Sub-region">
+                <input type="text" id="creature-level" data-translate-key-placeholder="levelLabel" placeholder="Level">
+                <input type="text" id="creature-weather" data-translate-key-placeholder="weatherLabel" placeholder="Weather">
+                <input type="text" id="creature-time" data-translate-key-placeholder="timeLabel" placeholder="Time">
+                <div id="image-drop-zone">
+                    <p data-translate-key="imageLabel">Drag & drop an image or click to upload</p>
+                    <input type="file" id="creature-image" accept="image/*" style="display: none;">
+                </div>
+                <button type="submit" data-translate-key="submitBtn">Add Guide</button>
+            </form>
         </div>
-        <button class="close" id="closeBtn" data-lang="close_btn">닫기 ✖</button>
-      </div>
-      <div class="modalBody">
-        <div class="box">
-          <h4 data-lang="detail_modal_basic_info">기본 정보</h4>
-          <div class="kv">
-            <span data-lang="detail_modal_attr">속성</span><b id="mAttr">-</b>
-            <span data-lang="detail_modal_role">역할</span><b id="mRole">-</b>
-            <span data-lang="detail_modal_habitat">서식지</span><b id="mHabitat">-</b>
-            <span data-lang="detail_modal_trait">특성</span><b id="mTrait">-</b>
-          </div>
-          <div class="barWrap">
-            <div class="barRow"><span data-lang="detail_modal_cuteness">귀여움</span><span id="mCuteVal">0</span></div>
-            <div class="bar"><i id="mCuteBar" style="width:0%"></i></div>
-            <div class="barRow"><span data-lang="detail_modal_difficulty">난이도</span><span id="mDiffVal">0</span></div>
-            <div class="bar"><i id="mDiffBar" style="width:0%"></i></div>
-          </div>
-        </div>
-
-        <div class="box">
-          <h4 data-lang="detail_modal_desc">설명</h4>
-          <div id="mDesc" style="color:var(--muted);font-size:13px;line-height:1.6"></div>
-          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap" id="mTags"></div>
-          <div style="margin-top:12px;color:var(--muted);font-size:12px">
-            <span data-lang="detail_modal_tip">💬 플레이 팁:</span> <span id="mTip">-</span>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Add Guide Modal -->
-  <div class="modalOverlay" id="addModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
-      <div class="modal" role="document">
-        <div class="modalTop">
-          <div class="modalTitle">
-            <b data-lang="add_modal_title">새로운 친구 추가</b>
-          </div>
-          <button class="close" id="addCloseBtn" data-lang="close_btn">닫기 ✖</button>
-        </div>
-        <div class="modalBody">
-          <form id="addGuideForm" class="box">
-              <h4 style="margin-bottom: 12px;" data-lang="add_modal_form_title">새로운 도감 정보 입력</h4>
-              <input type="text" name="name" data-lang="add_modal_name_placeholder" placeholder="이름 (예: 불꽃 다람쥐)" required>
-              <input type="text" name="emoji" data-lang="add_modal_emoji_placeholder" placeholder="대표 이모지 (예: 🔥)" required>
-              <select name="attr" required>
-                  <option value="" disabled selected data-lang="add_modal_attr_select">속성 선택</option>
-                  <option value="불" data-lang="attr_fire">불</option>
-                  <option value="물" data-lang="attr_water">물</option>
-                  <option value="바람" data-lang="attr_wind">바람</option>
-                  <option value="땅" data-lang="attr_earth">땅</option>
-                  <option value="빛" data-lang="attr_light">빛</option>
-                  <option value="어둠" data-lang="attr_dark">어둠</option>
-              </select>
-              <input type="text" name="role" data-lang="add_modal_role_placeholder" placeholder="역할 (예: 딜러)" required>
-              <textarea name="desc" data-lang="add_modal_desc_placeholder" placeholder="설명 (예: 꼬리에 불꽃을 달고 다닌다.)" required></textarea>
-              <input type="text" name="tags" data-lang="add_modal_tags_placeholder" placeholder="태그 (예: 다람쥐, 불꽃, 귀여움)">
-              <button type="submit" class="btn" style="width: 100%; margin-top: 10px;" data-lang="add_modal_submit_btn">추가하기</button>
-          </form>
-        </div>
-      </div>
-  </div>
-
-  <script src="translations.js"></script>
-  <script src="main.js"></script>
+    <script src="translations.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
