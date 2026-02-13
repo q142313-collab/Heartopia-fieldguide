@@ -10,14 +10,17 @@ const creatureImageInput = document.getElementById('creature-image');
 const langBtns = document.querySelectorAll('.lang-btn');
 const zoomInBtn = document.getElementById('zoom-in-btn');
 const zoomOutBtn = document.getElementById('zoom-out-btn');
+const modalTitle = document.getElementById('modal-title');
+const modalSubmitBtn = document.getElementById('modal-submit-btn');
 
 let guides = JSON.parse(localStorage.getItem('guides')) || [];
 let currentFilter = null;
 let currentLang = 'en';
 let currentCardSize = 280;
 const cardSizeStep = 20;
-const minCardSize = 200;
+const minCardSize = 150;
 const maxCardSize = 400;
+let editingGuideIndex = null;
 
 const getTranslation = (key, lang = currentLang) => {
     return translations[lang][key] || key;
@@ -56,8 +59,7 @@ const setLanguage = (lang) => {
 const displayGuides = () => {
   const filteredGuides = currentFilter ? guides.filter(guide => guide.category === currentFilter) : guides;
   const guidesHTMLString = filteredGuides
-    .map(
-      (guide) => {
+    .map((guide, index) => {
         const name = guide.name[currentLang] || guide.name;
         const region = guide.region[currentLang] || guide.region;
         const subRegion = guide.subRegion[currentLang] || guide.subRegion;
@@ -72,6 +74,10 @@ const displayGuides = () => {
         <p><strong>${getTranslation('levelLabel')}:</strong> ${guide.level}</p>
         <p><strong>${getTranslation('weatherLabel')}:</strong> ${guide.weather}</p>
         <p><strong>${getTranslation('timeLabel')}:</strong> ${guide.time}</p>
+        <div class="card-actions">
+            <button class="edit-btn" data-index="${index}">${getTranslation('editBtn')}</button>
+            <button class="delete-btn" data-index="${index}">${getTranslation('deleteBtn')}</button>
+        </div>
       </div>
     </div>
     `
@@ -81,7 +87,16 @@ const displayGuides = () => {
 };
 
 const toggleModal = (show) => {
-  modal.style.display = show ? 'block' : 'none';
+    modal.style.display = show ? 'block' : 'none';
+    if (!show) {
+        editingGuideIndex = null;
+        addGuideForm.reset();
+        const dropZoneText = imageDropZone.querySelector('p');
+        if (dropZoneText) {
+            dropZoneText.textContent = getTranslation('imageLabel');
+        }
+        delete creatureImageInput.dataset.url;
+    }
 };
 
 const handleImageFile = (file) => {
@@ -103,14 +118,11 @@ const parseHTMLAndCreateGuides = (html, category) => {
     const rows = doc.querySelectorAll('tr');
     const newGuides = [];
     let lastRegionKo = '';
-    let lastRegionEn = '';
 
     for (let i = 1; i < rows.length; i++) {
         const cells = rows[i].querySelectorAll('td');
-        if (cells.length < 6) continue;
-
         let nameKo, regionKo, subRegionKo, level, weather, time, imgSrc;
-        
+
         const imgElement = cells[0].querySelector('img');
         if (!imgElement) continue;
         imgSrc = `fieldhuide/${imgElement.getAttribute('src')}`;
@@ -123,22 +135,20 @@ const parseHTMLAndCreateGuides = (html, category) => {
             weather = cells[5].textContent.trim();
             time = cells[6].textContent.trim();
             lastRegionKo = regionKo;
-        } else { 
+        } else if (cells.length === 6) {
             regionKo = lastRegionKo;
             subRegionKo = cells[2].textContent.trim();
             level = cells[3].textContent.trim();
             weather = cells[4].textContent.trim();
             time = cells[5].textContent.trim();
+        } else {
+            continue;
         }
 
-        const nameEn = `[EN] ${nameKo}`;
-        const regionEn = `[EN] ${regionKo}`;
-        const subRegionEn = `[EN] ${subRegionKo}`;
-
         newGuides.push({
-            name: { ko: nameKo, en: nameEn },
-            region: { ko: regionKo, en: regionEn },
-            subRegion: { ko: subRegionKo, en: subRegionEn },
+            name: { ko: nameKo, en: `[EN] ${nameKo}` },
+            region: { ko: regionKo, en: `[EN] ${regionKo}` },
+            subRegion: { ko: subRegionKo, en: `[EN] ${subRegionKo}` },
             level: level,
             weather: weather,
             time: time,
@@ -149,6 +159,39 @@ const parseHTMLAndCreateGuides = (html, category) => {
     return newGuides;
 };
 
+const openEditModal = (index) => {
+    const guide = guides[index];
+    if (!guide) return;
+
+    editingGuideIndex = index;
+
+    document.getElementById('creature-name').value = guide.name[currentLang] || guide.name;
+    document.getElementById('creature-category').value = guide.category;
+    document.getElementById('creature-region').value = guide.region[currentLang] || guide.region;
+    document.getElementById('creature-sub-region').value = guide.subRegion[currentLang] || guide.subRegion;
+    document.getElementById('creature-level').value = guide.level;
+    document.getElementById('creature-weather').value = guide.weather;
+    document.getElementById('creature-time').value = guide.time;
+    
+    creatureImageInput.dataset.url = guide.image;
+    const dropZoneText = imageDropZone.querySelector('p');
+    if (dropZoneText) {
+        dropZoneText.textContent = guide.image ? guide.image.split('/').pop() : getTranslation('imageLabel');
+    }
+
+    modalTitle.textContent = getTranslation('editGuideTitle');
+    modalSubmitBtn.textContent = getTranslation('saveBtn');
+    
+    toggleModal(true);
+};
+
+const deleteGuide = (index) => {
+    if (confirm(getTranslation('deleteConfirm'))) {
+        guides.splice(index, 1);
+        localStorage.setItem('guides', JSON.stringify(guides));
+        displayGuides();
+    }
+};
 
 const loadInitialData = async () => {
   if (guides.length === 0) {
@@ -170,6 +213,17 @@ const loadInitialData = async () => {
   setLanguage(currentLang);
   updateCardSize();
 };
+
+pokedex.addEventListener('click', (e) => {
+    if (e.target.classList.contains('edit-btn')) {
+        const index = e.target.dataset.index;
+        openEditModal(index);
+    }
+    if (e.target.classList.contains('delete-btn')) {
+        const index = e.target.dataset.index;
+        deleteGuide(index);
+    }
+});
 
 zoomInBtn.addEventListener('click', () => {
     if (currentCardSize < maxCardSize) {
@@ -204,7 +258,12 @@ imageDropZone.addEventListener('drop', (e) => {
   handleImageFile(e.dataTransfer.files[0]);
 });
 
-addGuideBtn.addEventListener('click', () => toggleModal(true));
+addGuideBtn.addEventListener('click', () => {
+    editingGuideIndex = null;
+    modalTitle.textContent = getTranslation('addGuideTitle');
+    modalSubmitBtn.textContent = getTranslation('addGuideBtn');
+    toggleModal(true);
+});
 closeBtn.addEventListener('click', () => toggleModal(false));
 window.addEventListener('click', (e) => {
   if (e.target === modal) {
@@ -213,44 +272,40 @@ window.addEventListener('click', (e) => {
 });
 
 addGuideForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  
-  const newGuide = {
-    name: {},
-    region: {},
-    subRegion: {},
-    level: document.getElementById('creature-level').value,
-    weather: document.getElementById('creature-weather').value,
-    time: document.getElementById('creature-time').value,
-    image: creatureImageInput.dataset.url || '',
-    category: document.getElementById('creature-category').value,
-  };
+    e.preventDefault();
 
-  const nameInput = document.getElementById('creature-name').value;
-  const regionInput = document.getElementById('creature-region').value;
-  const subRegionInput = document.getElementById('creature-sub-region').value;
+    const guideData = {
+        level: document.getElementById('creature-level').value,
+        weather: document.getElementById('creature-weather').value,
+        time: document.getElementById('creature-time').value,
+        image: creatureImageInput.dataset.url || '',
+        category: document.getElementById('creature-category').value,
+    };
 
-  if (currentLang === 'en') {
-      newGuide.name = { en: nameInput, ko: `[번역 필요] ${nameInput}` };
-      newGuide.region = { en: regionInput, ko: `[번역 필요] ${regionInput}` };
-      newGuide.subRegion = { en: subRegionInput, ko: `[번역 필요] ${subRegionInput}` };
-  } else {
-      newGuide.name = { en: `[Needs Translation] ${nameInput}`, ko: nameInput };
-      newGuide.region = { en: `[Needs Translation] ${regionInput}`, ko: regionInput };
-      newGuide.subRegion = { en: `[Needs Translation] ${subRegionInput}`, ko: subRegionInput };
-  }
+    const nameInput = document.getElementById('creature-name').value;
+    const regionInput = document.getElementById('creature-region').value;
+    const subRegionInput = document.getElementById('creature-sub-region').value;
 
-  guides.push(newGuide);
-  localStorage.setItem('guides', JSON.stringify(guides));
-  displayGuides();
-  toggleModal(false);
-  addGuideForm.reset();
-  
-  const dropZoneText = imageDropZone.querySelector('p');
-    if (dropZoneText) {
-        dropZoneText.textContent = getTranslation('imageLabel');
+    if (editingGuideIndex !== null) {
+        const originalGuide = guides[editingGuideIndex];
+        guideData.name = { ...originalGuide.name, [currentLang]: nameInput };
+        guideData.region = { ...originalGuide.region, [currentLang]: regionInput };
+        guideData.subRegion = { ...originalGuide.subRegion, [currentLang]: subRegionInput };
+        guides[editingGuideIndex] = { ...originalGuide, ...guideData };
+    } else {
+        guideData.name = { en: `[Needs Translation] ${nameInput}`, ko: nameInput };
+        guideData.region = { en: `[Needs Translation] ${regionInput}`, ko: regionInput };
+        guideData.subRegion = { en: `[Needs Translation] ${subRegionInput}`, ko: subRegionInput };
+        guideData.name[currentLang] = nameInput;
+        guideData.region[currentLang] = regionInput;
+        guideData.subRegion[currentLang] = subRegionInput;
+
+        guides.push(guideData);
     }
-  delete creatureImageInput.dataset.url;
+
+    localStorage.setItem('guides', JSON.stringify(guides));
+    displayGuides();
+    toggleModal(false);
 });
 
 filterBtns.forEach(btn => {
