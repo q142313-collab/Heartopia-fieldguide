@@ -12,7 +12,7 @@
 
 body {
   font-family: 'Nunito', sans-serif;
-  background: linear-gradient(to top, #f8cdda 0%, #b8c6e5 100%);
+  background: linear-gradient(to top, #ffdde1 0%, #ffc7d1 100%);
   color: #555;
   min-height: 100vh;
 }
@@ -46,7 +46,7 @@ body {
 
 .lang-btn {
   background: rgba(255, 255, 255, 0.5);
-  color: #8b95c2;
+  color: #e6a5b5;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -57,7 +57,7 @@ body {
 
 .lang-btn:hover, .lang-btn.active {
   background: #fff;
-  color: #f8cdda;
+  color: #ffdde1;
 }
 
 .controls {
@@ -78,7 +78,7 @@ body {
 
 #add-guide-btn, .filter-btn {
   background: #fff;
-  color: #a0a8d3;
+  color: #d19ca9;
   border: none;
   padding: 0.8rem 1.8rem;
   border-radius: 30px;
@@ -95,10 +95,10 @@ body {
 }
 
 .filter-btn.active {
-    background: #f8cdda;
+    background: #ffc7d1;
     color: white;
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(248, 205, 218, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 199, 209, 0.4);
 }
 
 .pokedex-container {
@@ -130,7 +130,7 @@ body {
 }
 
 .pokemon-card h2 {
-    color: #6a71a0;
+    color: #b38a9a;
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
@@ -142,7 +142,7 @@ body {
     line-height: 1.5;
 }
 .pokemon-card p strong {
-    color: #a0a8d3;
+    color: #d19ca9;
 }
 
 .modal {
@@ -171,7 +171,7 @@ body {
 
 .modal-content h2 {
     text-align: center;
-    color: #6a71a0;
+    color: #b38a9a;
     margin-bottom: 1.5rem;
 }
 
@@ -187,7 +187,7 @@ body {
 
 .close-btn:hover,
 .close-btn:focus {
-  color: #f8cdda;
+  color: #ffc7d1;
   text-decoration: none;
   cursor: pointer;
 }
@@ -206,7 +206,7 @@ body {
 
 #add-guide-form input:focus, #add-guide-form select:focus {
     outline: none;
-    border-color: #b8c6e5;
+    border-color: #ffc7d1;
     background: #fff;
 }
 
@@ -221,13 +221,13 @@ body {
   transition: border-color 0.3s ease, color 0.3s ease;
 }
 #image-drop-zone:hover {
-    border-color: #b8c6e5;
-    color: #b8c6e5;
+    border-color: #ffc7d1;
+    color: #ffc7d1;
 }
 
 #add-guide-form button {
   width: 100%;
-  background: linear-gradient(to right, #b8c6e5, #f8cdda);
+  background: linear-gradient(to right, #ffc7d1, #ffdde1);
   color: white;
   padding: 14px 20px;
   border: none;
@@ -240,7 +240,7 @@ body {
 
 #add-guide-form button:hover {
     opacity: 0.9;
-    box-shadow: 0 5px 15px rgba(184, 198, 229, 0.5);
+    box-shadow: 0 5px 15px rgba(255, 199, 209, 0.5);
 }
 
 .size-controls {
@@ -251,7 +251,7 @@ body {
 
 .size-controls button {
     background: rgba(255, 255, 255, 0.5);
-    color: #8b95c2;
+    color: #e6a5b5;
     border: none;
     width: 40px;
     height: 40px;
@@ -267,7 +267,7 @@ body {
 
 .size-controls button:hover {
     background: #fff;
-    color: #f8cdda;
+    color: #ffdde1;
 }
 
 @media (max-width: 768px) {
