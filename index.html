@@ -20,6 +20,45 @@
     <div id="pokedex" class="pokedex-container">
     </div>
   </div>
+
+  <div id="add-guide-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Add New Creature</h2>
+      <form id="add-guide-form">
+        <input type="text" id="creature-name" placeholder="Name" required>
+        <select id="creature-region" required>
+          <option value="" disabled selected>Select Region</option>
+          <option value="grasslands">Grasslands</option>
+          <option value="forest">Forest</option>
+          <option value="mountain">Mountain</option>
+          
+        </select>
+        <input type="text" id="creature-sub-region" placeholder="Sub-region">
+        <input type="number" id="creature-level" placeholder="Level">
+        <select id="creature-weather">
+          <option value="">Any Weather</option>
+          <option value="sunny">Sunny</option>
+          <option value="rainy">Rainy</option>
+          <option value="cloudy">Cloudy</option>
+        </select>
+        <select id="creature-time">
+          <option value="">Any Time</option>
+          <option value="day">Day</option>
+          <option value="night">Night</option>
+        </select>
+        <input type="text" id="creature-image" placeholder="Image URL" required>
+         <select id="creature-category" required>
+          <option value="" disabled selected>Select Category</option>
+          <option value="insect">Insect</option>
+          <option value="fish">Fish</option>
+          <option value="bird">Bird</option>
+        </select>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+
   <script defer type="text/javascript" src="/main.js"></script>
 </body>
 </html>
