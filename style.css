@@ -78,6 +78,58 @@ h1 {
   background-color: var(--button-hover-background);
 }
 
+/* Form Styles */
+.form-container {
+  margin-top: 40px; /* Add some space between lotto and form */
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group textarea {
+  width: calc(100% - 20px); /* Account for padding */
+  padding: 10px;
+  border: 1px solid var(--text-color); /* Use theme color for border */
+  border-radius: 5px;
+  background-color: var(--container-background); /* Use container background */
+  color: var(--text-color); /* Use theme text color */
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group textarea:focus {
+  border-color: var(--button-background); /* Highlight focus with button color */
+  outline: none;
+}
+
+.submit-btn {
+  background-color: var(--button-background);
+  color: var(--button-text-color);
+  border: none;
+  padding: 15px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Make button full width */
+  box-sizing: border-box; /* Include padding in width */
+}
+
+.submit-btn:hover {
+  background-color: var(--button-hover-background);
+}
+
 /* Theme Switcher */
 .theme-switch-container {
   position: absolute;
