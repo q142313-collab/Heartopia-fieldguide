@@ -47,7 +47,10 @@
           <option value="day">Day</option>
           <option value="night">Night</option>
         </select>
-        <input type="text" id="creature-image" placeholder="Image URL" required>
+        <div id="image-drop-zone">
+          <p>Drag & Drop image here or click to select</p>
+          <input type="file" id="creature-image" accept="image/*" required>
+        </div>
          <select id="creature-category" required>
           <option value="" disabled selected>Select Category</option>
           <option value="insect">Insect</option>

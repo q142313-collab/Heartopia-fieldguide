@@ -135,6 +135,23 @@ h1 {
     border-radius: 5px;
 }
 
+#image-drop-zone {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+#image-drop-zone p {
+  margin: 0;
+  color: #888;
+}
+
+#creature-image {
+  display: none;
+}
+
+
 #add-guide-form button {
     background-color: var(--button-background);
     color: white;
