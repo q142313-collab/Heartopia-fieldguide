@@ -1,64 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heartopia Field Guide</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>도감 | TinyDex</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-        <div class="title-container">
-            <h1 data-translate-key="title">Heartopia Field Guide</h1>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#" id="homeBtn" aria-label="Home">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>TinyDex</h1>
+          <p>귀여운 게임 도감</p>
         </div>
-        <div class="language-switcher">
-            <button class="lang-btn" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="ko">KO</button>
-            <button class="lang-btn" data-lang="ja">JA</button>
+      </a>
+
+      <div class="actions">
+        <div class="pill" title="검색">
+          🔎
+          <input id="searchInput" placeholder="이름 / 태그로 검색… (예: 버섯, 힐러, 불)" />
+          <span class="kbd">Ctrl + K</span>
         </div>
+
+        <select id="attrFilter" class="select" title="속성 필터">
+          <option value="all">속성: 전체</option>
+          <option value="불">불</option>
+          <option value="물">물</option>
+          <option value="바람">바람</option>
+          <option value="땅">땅</option>
+          <option value="빛">빛</option>
+          <option value="어둠">어둠</option>
+        </select>
+
+        <button class="btn" id="randomBtn">랜덤 보기 ✨</button>
+      </div>
     </header>
-    <main>
-        <div class="controls">
-          <div class="filters">
-            <button class="filter-btn" data-category="insect" data-translate-key="filterInsect">🦋 Insect</button>
-            <button class="filter-btn" data-category="fish" data-translate-key="filterFish">🐠 Fish</button>
-            <button class="filter-btn" data-category="bird" data-translate-key="filterBird">🐦 Bird</button>
+
+    <section class="hero">
+      <div class="panel">
+        <h2>도감이 완성될수록 마을이 커져요 🌱</h2>
+        <p>
+          카드형 도감 + 검색/필터 + 상세 모달까지 포함한 디자인 템플릿이에요.
+          아래 예시 데이터만 바꾸면 바로 게임 느낌으로 확장할 수 있어요.
+        </p>
+        <div class="stats">
+          <div class="chip"><span class="dot"></span> 발견한 친구: <b id="foundCount">0</b></div>
+          <div class="chip"><span class="dot pink"></span> 희귀: <b id="rareCount">0</b></div>
+          <div class="chip"><span class="dot gray"></span> 전체: <b id="totalCount">0</b></div>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="notice">
+          <div class="badge"><span>💡</span></div>
+          <div>
+            <h3>구독/좋아요 유도 문구도 넣기 쉬움</h3>
+            <small>
+              예: “도감 100% 달성하면 특별 스킨 공개!” 같은 이벤트 문구를
+              여기 공지 박스에 넣어두면 좋음.
+            </small>
           </div>
-          <button id="add-guide-btn" data-translate-key="addGuide">✨ Add New Guide</button>
         </div>
-        <div id="pokedex" class="pokedex-container">
+        <div class="notice">
+          <div class="badge"><span>🧩</span></div>
+          <div>
+            <h3>확장 아이디어</h3>
+            <small>
+              “획득처/드랍률/출현 시간대/진화 트리/보이스” 섹션을
+              모달에 더 붙이면 완전 게임 도감 느낌!
+            </small>
+          </div>
         </div>
-    </main>
+      </div>
+    </section>
+
+    <div class="gridHead">
+      <h3>도감 목록</h3>
+      <div class="count"><span id="visibleCount">0</span>개 표시중</div>
+    </div>
+
+    <section class="grid" id="grid"></section>
+
+    <footer>
+      © TinyDex UI — 자유롭게 수정해서 게임 도감 UI로 쓰세요.
+    </footer>
   </div>
 
-  <div id="add-guide-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-btn">&times;</span>
-      <h2 data-translate-key="modalTitle">Add a New Guide</h2>
-      <form id="add-guide-form">
-        <input type="text" id="creature-name" placeholder="Creature Name" data-translate-key-placeholder="creatureName" required>
-        <input type="text" id="creature-region" placeholder="Region" data-translate-key-placeholder="creatureRegion" required>
-        <input type="text" id="creature-sub-region" placeholder="Sub-region" data-translate-key-placeholder="creatureSubRegion" required>
-        <input type="text" id="creature-level" placeholder="Level" data-translate-key-placeholder="creatureLevel" required>
-        <input type="text" id="creature-weather" placeholder="Weather" data-translate-key-placeholder="creatureWeather" required>
-        <input type="text" id="creature-time" placeholder="Time" data-translate-key-placeholder="creatureTime" required>
-        <select id="creature-category" required>
-          <option value="" disabled selected data-translate-key="selectCategory">Select a category</option>
-          <option value="insect" data-translate-key="filterInsect">Insect</option>
-          <option value="fish" data-translate-key="filterFish">Fish</option>
-          <option value="bird" data-translate-key="filterBird">Bird</option>
-        </select>
-        <div id="image-drop-zone">
-          <p data-translate-key="imageLabel">Drag & Drop image here or click to select</p>
-          <input type="file" id="creature-image" accept="image/*" style="display: none;">
+  <!-- Modal -->
+  <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <div class="modalTop">
+        <div class="modalTitle">
+          <div class="emoji" id="mEmoji">🙂</div>
+          <div>
+            <b id="mName">이름</b>
+            <div id="mMeta">#000 · 속성 · 역할</div>
+          </div>
         </div>
-        <button type="submit" data-translate-key="submitGuide">Add Guide</button>
-      </form>
+        <button class="close" id="closeBtn">닫기 ✖</button>
+      </div>
+      <div class="modalBody">
+        <div class="box">
+          <h4>기본 정보</h4>
+          <div class="kv">
+            <span>속성</span><b id="mAttr">-</b>
+            <span>역할</span><b id="mRole">-</b>
+            <span>서식지</span><b id="mHabitat">-</b>
+            <span>특성</span><b id="mTrait">-</b>
+          </div>
+          <div class="barWrap">
+            <div class="barRow"><span>귀여움</span><span id="mCuteVal">0</span></div>
+            <div class="bar"><i id="mCuteBar" style="width:0%"></i></div>
+            <div class="barRow"><span>난이도</span><span id="mDiffVal">0</span></div>
+            <div class="bar"><i id="mDiffBar" style="width:0%"></i></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h4>설명</h4>
+          <div id="mDesc" style="color:var(--muted);font-size:13px;line-height:1.6"></div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap" id="mTags"></div>
+          <div style="margin-top:12px;color:var(--muted);font-size:12px">
+            💬 플레이 팁: <span id="mTip">-</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script src="translations.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
