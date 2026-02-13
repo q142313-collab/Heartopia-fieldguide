@@ -1,1 +1,239 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');\n\n* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nbody {\n  font-family: 'Poppins', sans-serif;\n  background: linear-gradient(to right, #654ea3, #eaafc8);\n  color: #333;\n}\n\n.container {\n  max-width: 1200px;\n  margin: 2rem auto;\n  padding: 0 2rem;\n}\n\n.header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 1rem 0;\n  border-bottom: 1px solid rgba(255, 255, 255, 0.2);\n}\n\n.header h1 {\n  font-size: 2rem;\n  color: #fff;\n  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);\n}\n\n.controls {\n  margin: 2rem 0;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n#add-guide-btn, .filter-btn, .lang-btn {\n  background: rgba(255, 255, 255, 0.1);\n  color: #fff;\n  border: 1px solid rgba(255, 255, 255, 0.2);\n  padding: 0.75rem 1.5rem;\n  border-radius: 2rem;\n  cursor: pointer;\n  transition: all 0.3s ease;\n  backdrop-filter: blur(10px);\n}\n\n#add-guide-btn:hover, .filter-btn:hover, .lang-btn:hover {\n  background: rgba(255, 255, 255, 0.2);\n}\n\n.pokedex-container {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));\n  gap: 1.5rem;\n}\n\n.pokemon-card {\n  background: rgba(255, 255, 255, 0.1);\n  border-radius: 1rem;\n  padding: 1.5rem;\n  text-align: center;\n  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);\n  backdrop-filter: blur(10px);\n  border: 1px solid rgba(255, 255, 255, 0.18);\n  transition: transform 0.3s ease;\n}\n\n.pokemon-card:hover {\n    transform: translateY(-10px);\n}\n\n.pokemon-card img {\n  width: 100%;\n  height: 200px;\n  object-fit: cover;\n  border-radius: 0.5rem;\n  margin-bottom: 1rem;\n}\n\n.pokemon-card h2 {\n    color: #fff;\n    font-size: 1.5rem;\n    margin-bottom: 0.5rem;\n}\n\n.pokemon-card p {\n    color: #eee;\n    font-size: 0.9rem;\n}\n\n.modal {\n  display: none;\n  position: fixed;\n  z-index: 1;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  overflow: auto;\n  background-color: rgba(0, 0, 0, 0.5);\n  backdrop-filter: blur(5px);\n}\n\n.modal-content {\n  background: rgba(255, 255, 255, 0.8);\n  margin: 10% auto;\n  padding: 2rem;\n  border-radius: 1rem;\n  width: 90%;\n  max-width: 500px;\n  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);\n}\n\n.close-btn {\n  color: #555;\n  float: right;\n  font-size: 28px;\n  font-weight: bold;\n}\n\n.close-btn:hover,\n.close-btn:focus {\n  color: black;\n  text-decoration: none;\n  cursor: pointer;\n}\n\n#add-guide-form input, #add-guide-form select {\n  width: 100%;\n  padding: 12px;\n  margin: 8px 0 1rem 0;\n  display: inline-block;\n  border: 1px solid #ccc;\n  border-radius: 8px;\n  box-sizing: border-box;\n  background: rgba(255,255,255,0.5);\n  color: #333;\n}\n\n#image-drop-zone {\n  border: 2px dashed #aaa;\n  border-radius: 8px;\n  padding: 20px;\n  text-align: center;\n  cursor: pointer;\n  margin-bottom: 1rem;\n  color: #555;\n}\n\n#add-guide-form button {\n  width: 100%;\n  background-color: #654ea3;\n  color: white;\n  padding: 14px 20px;\n  margin: 8px 0;\n  border: none;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n}\n\n#add-guide-form button:hover {\n    background-color: #533a8b;\n}\n\n.language-switcher {\n    display: flex;\n    gap: 0.5rem;\n}\n
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(to top, #f8cdda 0%, #b8c6e5 100%);
+  color: #555;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.header h1 {
+  font-size: 3rem;
+  color: #fff;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  font-weight: 700;
+}
+
+.language-switcher {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lang-btn {
+  background: rgba(255, 255, 255, 0.5);
+  color: #8b95c2;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.lang-btn:hover {
+  background: #fff;
+  color: #f8cdda;
+}
+
+.controls {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#add-guide-btn, .filter-btn {
+  background: #fff;
+  color: #a0a8d3;
+  border: none;
+  padding: 0.8rem 1.8rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+#add-guide-btn:hover, .filter-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.filter-btn.active {
+    background: #f8cdda;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(248, 205, 218, 0.4);
+}
+
+.pokedex-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.pokemon-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.pokemon-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.pokemon-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px;
+  margin-bottom: 1rem;
+}
+
+.pokemon-card h2 {
+    color: #6a71a0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.pokemon-card p {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+.pokemon-card p strong {
+    color: #a0a8d3;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 2.5rem;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: #6a71a0;
+    margin-bottom: 1.5rem;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  color: #ccc;
+  font-size: 35px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: #f8cdda;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#add-guide-form input, #add-guide-form select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #f9f9f9;
+  color: #555;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.3s ease;
+}
+
+#add-guide-form input:focus, #add-guide-form select:focus {
+    outline: none;
+    border-color: #b8c6e5;
+    background: #fff;
+}
+
+#image-drop-zone {
+  border: 2px dashed #e0e0e0;
+  border-radius: 10px;
+  padding: 25px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  color: #bbb;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+#image-drop-zone:hover {
+    border-color: #b8c6e5;
+    color: #b8c6e5;
+}
+
+#add-guide-form button {
+  width: 100%;
+  background: linear-gradient(to right, #b8c6e5, #f8cdda);
+  color: white;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+#add-guide-form button:hover {
+    opacity: 0.9;
+    box-shadow: 0 5px 15px rgba(184, 198, 229, 0.5);
+}

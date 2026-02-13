@@ -9,21 +9,23 @@
 <body>
   <div class="container">
     <header class="header">
-      <h1 data-translate-key="title">Heartopia Field Guide</h1>
-      <div class="language-switcher">
-        <button class="lang-btn" data-lang="en">EN</button>
-        <button class="lang-btn" data-lang="ko">KO</button>
-        <button class="lang-btn" data-lang="ja">JA</button>
-      </div>
+        <div class="title-container">
+            <h1 data-translate-key="title">Heartopia Field Guide</h1>
+        </div>
+        <div class="language-switcher">
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="ko">KO</button>
+            <button class="lang-btn" data-lang="ja">JA</button>
+        </div>
     </header>
     <main>
         <div class="controls">
-          <button id="add-guide-btn" data-translate-key="addGuide">Add Guide</button>
           <div class="filters">
-            <button class="filter-btn" data-category="insect" data-translate-key="filterInsect">Insect</button>
-            <button class="filter-btn" data-category="fish" data-translate-key="filterFish">Fish</button>
-            <button class="filter-btn" data-category="bird" data-translate-key="filterBird">Bird</button>
+            <button class="filter-btn" data-category="insect" data-translate-key="filterInsect">🦋 Insect</button>
+            <button class="filter-btn" data-category="fish" data-translate-key="filterFish">🐠 Fish</button>
+            <button class="filter-btn" data-category="bird" data-translate-key="filterBird">🐦 Bird</button>
           </div>
+          <button id="add-guide-btn" data-translate-key="addGuide">✨ Add New Guide</button>
         </div>
         <div id="pokedex" class="pokedex-container">
         </div>
@@ -42,6 +44,7 @@
         <input type="text" id="creature-weather" placeholder="Weather" data-translate-key-placeholder="creatureWeather" required>
         <input type="text" id="creature-time" placeholder="Time" data-translate-key-placeholder="creatureTime" required>
         <select id="creature-category" required>
+          <option value="" disabled selected data-translate-key="selectCategory">Select a category</option>
           <option value="insect" data-translate-key="filterInsect">Insect</option>
           <option value="fish" data-translate-key="filterFish">Fish</option>
           <option value="bird" data-translate-key="filterBird">Bird</option>

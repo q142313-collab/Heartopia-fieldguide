@@ -16,11 +16,15 @@ const setLanguage = (lang) => {
   currentLang = lang;
   document.querySelectorAll('[data-translate-key]').forEach(el => {
     const key = el.dataset.translateKey;
-    el.textContent = translations[lang][key];
+    if (translations[lang] && translations[lang][key]) {
+      el.textContent = translations[lang][key];
+    }
   });
   document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
     const key = el.dataset.translateKeyPlaceholder;
-    el.placeholder = translations[lang][key];
+    if (translations[lang] && translations[lang][key]) {
+      el.placeholder = translations[lang][key];
+    }
   });
 };
 
@@ -31,12 +35,14 @@ const displayGuides = () => {
       (guide) => `
     <div class="pokemon-card">
       <img src="${guide.image}" />
-      <h2>${guide.name}</h2>
-      <p><strong>Region:</strong> ${guide.region}</p>
-      <p><strong>Sub-region:</strong> ${guide.subRegion}</p>
-      <p><strong>Level:</strong> ${guide.level}</p>
-      <p><strong>Weather:</strong> ${guide.weather}</p>
-      <p><strong>Time:</strong> ${guide.time}</p>
+      <div class="card-content">
+        <h2>${guide.name}</h2>
+        <p><strong>Region:</strong> ${guide.region}</p>
+        <p><strong>Sub-region:</strong> ${guide.subRegion}</p>
+        <p><strong>Level:</strong> ${guide.level}</p>
+        <p><strong>Weather:</strong> ${guide.weather}</p>
+        <p><strong>Time:</strong> ${guide.time}</p>
+      </div>
     </div>
     `
     )
@@ -86,36 +92,42 @@ const parseHTML = (html, category) => {
 
 const loadInitialData = async () => {
   if (guides.length === 0) {
-    const fishHTML = await fetch('.vscode/fieldhuide/어류.html').then(res => res.text());
-    const birdHTML = await fetch('.vscode/fieldhuide/조류.html').then(res => res.text());
-    const insectHTML = await fetch('.vscode/fieldhuide/곤충.html').then(res => res.text());
+    try {
+        const fishHTML = await fetch('.vscode/fieldhuide/어류.html').then(res => res.text());
+        const birdHTML = await fetch('.vscode/fieldhuide/조류.html').then(res => res.text());
+        const insectHTML = await fetch('.vscode/fieldhuide/곤충.html').then(res => res.text());
 
-    const fishGuides = parseHTML(fishHTML, 'fish');
-    const birdGuides = parseHTML(birdHTML, 'bird');
-    const insectGuides = parseHTML(insectHTML, 'insect');
+        const fishGuides = parseHTML(fishHTML, 'fish');
+        const birdGuides = parseHTML(birdHTML, 'bird');
+        const insectGuides = parseHTML(insectHTML, 'insect');
 
-    guides = [...fishGuides, ...birdGuides, ...insectGuides];
-    localStorage.setItem('guides', JSON.stringify(guides));
-    displayGuides();
+        guides = [...fishGuides, ...birdGuides, ...insectGuides];
+        localStorage.setItem('guides', JSON.stringify(guides));
+    } catch (error) {
+        console.error("Error loading initial data:", error);
+    }
   }
+  displayGuides();
+  setLanguage(currentLang);
 };
+
 
 imageDropZone.addEventListener('click', () => creatureImageInput.click());
 creatureImageInput.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
 
 imageDropZone.addEventListener('dragover', (e) => {
   e.preventDefault();
-  imageDropZone.style.borderColor = '#654ea3';
+  imageDropZone.style.borderColor = '#b8c6e5';
 });
 
 imageDropZone.addEventListener('dragleave', (e) => {
   e.preventDefault();
-  imageDropZone.style.borderColor = '#aaa';
+  imageDropZone.style.borderColor = '#e0e0e0';
 });
 
 imageDropZone.addEventListener('drop', (e) => {
   e.preventDefault();
-  imageDropZone.style.borderColor = '#aaa';
+  imageDropZone.style.borderColor = '#e0e0e0';
   handleImageFile(e.dataTransfer.files[0]);
 });
 
@@ -144,14 +156,23 @@ addGuideForm.addEventListener('submit', (e) => {
   displayGuides();
   toggleModal(false);
   addGuideForm.reset();
-  imageDropZone.querySelector('p').textContent = 'Drag & Drop image here or click to select';
+  imageDropZone.querySelector('p').textContent = translations[currentLang].imageLabel;
   delete creatureImageInput.dataset.url;
 });
 
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const category = btn.dataset.category;
-    currentFilter = currentFilter === category ? null : category;
+    
+    filterBtns.forEach(b => b.classList.remove('active'));
+    
+    if (currentFilter === category) {
+      currentFilter = null;
+    } else {
+      currentFilter = category;
+      btn.classList.add('active');
+    }
+    
     displayGuides();
   });
 });
@@ -163,7 +184,4 @@ langBtns.forEach(btn => {
   });
 });
 
-loadInitialData().then(() => {
-  setLanguage(currentLang);
-  displayGuides();
-});
+loadInitialData();
