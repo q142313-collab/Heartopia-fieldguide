@@ -59,7 +59,8 @@ const dex = [
     const state = {
       q: "",
       attr: "all",
-      found: new Set([1,2,4,6]) // 예시: 발견한 ID
+      found: new Set([1,2,4,6]), // 예시: 발견한 ID
+      lang: "ko"
     };
 
     // ===== Elements =====
@@ -71,6 +72,8 @@ const dex = [
     const foundCount = document.getElementById("foundCount");
     const rareCount = document.getElementById("rareCount");
     const randomBtn = document.getElementById("randomBtn");
+    const addGuideBtn = document.getElementById("addGuideBtn");
+    const langBtn = document.getElementById("langBtn");
 
     // Modal elements
     const modalOverlay = document.getElementById("modalOverlay");
@@ -90,6 +93,11 @@ const dex = [
     const mCuteBar = document.getElementById("mCuteBar");
     const mDiffBar = document.getElementById("mDiffBar");
 
+    // Add Modal elements
+    const addModalOverlay = document.getElementById("addModalOverlay");
+    const addCloseBtn = document.getElementById("addCloseBtn");
+    const addGuideForm = document.getElementById("addGuideForm");
+
     function matches(item){
       const q = state.q.trim().toLowerCase();
       const attrOk = state.attr === "all" ? true : item.attr === state.attr;
@@ -102,6 +110,8 @@ const dex = [
     }
 
     function render(){
+      applyTranslations();
+
       // header stats
       totalCount.textContent = dex.length.toString();
       foundCount.textContent = state.found.size.toString();
@@ -118,8 +128,8 @@ const dex = [
         card.dataset.id = item.id;
 
         const isFound = state.found.has(item.id);
-        const title = isFound ? item.name : "????? (미발견)";
-        const desc = isFound ? item.desc : "아직 발견하지 못했어요. 힌트를 찾아보세요!";
+        const title = isFound ? item.name : getTranslation("unfound_title");
+        const desc = isFound ? item.desc : getTranslation("unfound_desc");
 
         card.innerHTML = `
           <div class="thumb">
@@ -135,7 +145,7 @@ const dex = [
               <span class="tag attr">${item.attr}</span>
               <span class="tag">${item.role}</span>
               ${item.rare ? `<span class="tag rare">희귀</span>` : ``}
-              ${isFound ? item.tags.slice(0,2).map(t=>`<span class="tag">${t}</span>`).join("") : `<span class="tag">미발견</span>`}
+              ${isFound ? item.tags.slice(0,2).map(t=>`<span class="tag">${t}</span>`).join("") : `<span class="tag" data-lang="unfound_tag">${getTranslation("unfound_tag")}</span>`}
             </div>
           </div>
         `;
@@ -155,14 +165,14 @@ const dex = [
       // 미발견이면 잠금 상태
       if(!isFound){
         mEmoji.textContent = "🔒";
-        mName.textContent = "미발견";
-        mMeta.textContent = `#${String(item.id).padStart(3,"0")} · ??? · ???`;
+        mName.textContent = getTranslation("locked_modal_title");
+        mMeta.textContent = `#${String(item.id).padStart(3,"0")} ${getTranslation("locked_modal_meta")}`;
         mAttr.textContent = "-";
         mRole.textContent = "-";
         mHabitat.textContent = "-";
         mTrait.textContent = "-";
-        mDesc.textContent = "아직 도감에 기록이 없어요. 출현 조건을 만족하면 기록됩니다.";
-        mTags.innerHTML = `<span class="tag">힌트</span><span class="tag">${item.tip}</span>`;
+        mDesc.textContent = getTranslation("locked_modal_desc");
+        mTags.innerHTML = `<span class="tag">${getTranslation("locked_modal_tag_hint")}</span><span class="tag">${item.tip}</span>`;
         mTip.textContent = item.tip;
         mCuteVal.textContent = "0";
         mDiffVal.textContent = "0";
@@ -199,6 +209,32 @@ const dex = [
       modalOverlay.setAttribute("aria-hidden","true");
     }
 
+    function openAddModal() {
+      addModalOverlay.style.display = "flex";
+      addModalOverlay.setAttribute("aria-hidden","false");
+    }
+
+    function closeAddModal() {
+        addModalOverlay.style.display = "none";
+        addModalOverlay.setAttribute("aria-hidden","true");
+    }
+
+    function applyTranslations() {
+      document.querySelectorAll('[data-lang]').forEach(el => {
+        const key = el.getAttribute('data-lang');
+        const translation = getTranslation(key);
+        if (el.placeholder) {
+            el.placeholder = translation;
+        } else {
+            el.textContent = translation;
+        }
+      });
+    }
+
+    function getTranslation(key) {
+        return translations[state.lang][key] || key;
+    }
+
     // Events
     searchInput.addEventListener("input", (e) => {
       state.q = e.target.value;
@@ -214,9 +250,45 @@ const dex = [
       openModal(pick);
     });
 
+    addGuideBtn.addEventListener("click", openAddModal);
+    langBtn.addEventListener("click", () => {
+        state.lang = state.lang === "ko" ? "en" : "ko";
+        render();
+    });
+
+    addGuideForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newGuide = {
+            id: dex.length + 1,
+            name: formData.get("name"),
+            emoji: formData.get("emoji"),
+            attr: formData.get("attr"),
+            role: formData.get("role"),
+            desc: formData.get("desc"),
+            tags: formData.get("tags").split(",").map(tag => tag.trim()),
+            rare: false, // Defaulting rare to false
+            habitat: "", // Defaulting habitat to empty string
+            trait: "", // Defaulting trait to empty string
+            cute: 50, // Defaulting cute to 50
+            diff: 50, // Defaulting diff to 50
+            tip: "", // Defaulting tip to empty string
+        };
+        dex.push(newGuide);
+        state.found.add(newGuide.id);
+        e.target.reset();
+        closeAddModal();
+        render();
+    });
+
+
     closeBtn.addEventListener("click", closeModal);
+    addCloseBtn.addEventListener("click", closeAddModal);
     modalOverlay.addEventListener("click", (e) => {
       if(e.target === modalOverlay) closeModal();
+    });
+    addModalOverlay.addEventListener("click", (e) => {
+      if(e.target === addModalOverlay) closeAddModal();
     });
     window.addEventListener("keydown", (e) => {
       // Ctrl+K focus search
@@ -224,7 +296,10 @@ const dex = [
         e.preventDefault();
         searchInput.focus();
       }
-      if(e.key === "Escape") closeModal();
+      if(e.key === "Escape") {
+        closeModal();
+        closeAddModal();
+      }
     });
 
     // Initial
