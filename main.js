@@ -2,8 +2,9 @@
 const pokedex = document.getElementById('pokedex');
 const addGuideBtn = document.getElementById('add-guide-btn');
 const filterBtns = document.querySelectorAll('.filter-btn');
-const modal = document.getElementById('add-guide-modal');
-const closeBtn = document.querySelector('.close-btn');
+const addGuideModal = document.getElementById('add-guide-modal');
+const detailsModal = document.getElementById('details-modal');
+const closeBtns = document.querySelectorAll('.close-btn');
 const addGuideForm = document.getElementById('add-guide-form');
 const imageDropZone = document.getElementById('image-drop-zone');
 const creatureImageInput = document.getElementById('creature-image');
@@ -11,6 +12,7 @@ const langBtns = document.querySelectorAll('.lang-btn');
 const sizeSlider = document.getElementById('size-slider');
 const modalTitle = document.getElementById('modal-title');
 const modalSubmitBtn = document.getElementById('modal-submit-btn');
+const guideDetailsContainer = document.getElementById('guide-details');
 
 let guides = JSON.parse(localStorage.getItem('guides')) || [];
 let currentFilter = null;
@@ -54,36 +56,31 @@ const setLanguage = (lang) => {
 
 const displayGuides = () => {
   const filteredGuides = currentFilter ? guides.filter(guide => guide.category === currentFilter) : guides;
-  const guidesHTMLString = filteredGuides
-    .map((guide, index) => {
-        const name = guide.name[currentLang] || guide.name;
-        const region = guide.region[currentLang] || guide.region;
-        const subRegion = guide.subRegion[currentLang] || guide.subRegion;
-        
-        return `
-    <div class="pokemon-card">
-      <img src="${guide.image}" alt="${name}" />
-      <div class="card-content">
-        <h2>${name}</h2>
-        <p><strong>${getTranslation('regionLabel')}:</strong> ${region}</p>
-        <p><strong>${getTranslation('subRegionLabel')}:</strong> ${subRegion}</p>
-        <p><strong>${getTranslation('levelLabel')}:</strong> ${guide.level}</p>
-        <p><strong>${getTranslation('weatherLabel')}:</strong> ${guide.weather}</p>
-        <p><strong>${getTranslation('timeLabel')}:</strong> ${guide.time}</p>
-        <div class="card-actions">
-            <button class="edit-btn" data-index="${index}">${getTranslation('editBtn')}</button>
-            <button class="delete-btn" data-index="${index}">${getTranslation('deleteBtn')}</button>
+  const guidesHTMLString = filteredGuides.map((guide, index) => {
+      const name = guide.name[currentLang] || guide.name;
+      const region = guide.region[currentLang] || guide.region;
+      const subRegion = guide.subRegion[currentLang] || guide.subRegion;
+
+      return `
+      <div class="pokemon-card" data-index="${index}">
+        <div class="card-header">
+          <img src="${guide.image}" alt="${name}">
+          <h2>${name}</h2>
+        </div>
+        <div class="card-details">
+          <p><strong><img src="https://i.ibb.co/L8DR0cZ/region.png" width="16"/> ${getTranslation('regionLabel')}:</strong> <span class="detail-value">${region}</span></p>
+          <p><strong><img src="https://i.ibb.co/c12V3Jd/subregion.png" width="16"/> ${getTranslation('subRegionLabel')}:</strong> <span class="detail-value">${subRegion}</span></p>
+          <p><strong><img src="https://i.ibb.co/9g3v4f5/level.png" width="16"/> ${getTranslation('levelLabel')}:</strong> <span class="detail-value">${guide.level}</span></p>
+          <p><strong><img src="https://i.ibb.co/XY3gJvM/collection.png" width="16"/> ${getTranslation('collectionLabel')}:</strong> <span class="collection-stars">★★★★★</span></p>
         </div>
       </div>
-    </div>
-    `
-    })
-    .join('');
+      `;
+    }).join('');
   pokedex.innerHTML = guidesHTMLString;
 };
 
-const toggleModal = (show) => {
-    modal.style.display = show ? 'block' : 'none';
+const toggleAddGuideModal = (show) => {
+    addGuideModal.style.display = show ? 'block' : 'none';
     if (!show) {
         editingGuideIndex = null;
         addGuideForm.reset();
@@ -94,6 +91,41 @@ const toggleModal = (show) => {
         delete creatureImageInput.dataset.url;
     }
 };
+
+const toggleDetailsModal = (show) => {
+    detailsModal.style.display = show ? 'block' : 'none';
+};
+
+const showDetailsModal = (index) => {
+    const guide = guides[index];
+    if (!guide) return;
+
+    const name = guide.name[currentLang] || guide.name;
+    const region = guide.region[currentLang] || guide.region;
+    const subRegion = guide.subRegion[currentLang] || guide.subRegion;
+
+    const detailsHTML = `
+        <div id="details-modal-actions">
+            <button class="modal-action-btn edit-btn" data-index="${index}">✏️</button>
+            <button class="modal-action-btn delete-btn" data-index="${index}">🗑️</button>
+        </div>
+        <div id="guide-details-header">
+            <img src="${guide.image}" alt="${name}" />
+            <h2>${name}</h2>
+        </div>
+        <div id="guide-details-body">
+            <p><strong>${getTranslation('regionLabel')}</strong> ${region}</p>
+            <p><strong>${getTranslation('subRegionLabel')}</strong> ${subRegion}</p>
+            <p><strong>${getTranslation('levelLabel')}</strong> ${guide.level}</p>
+            <p><strong>${getTranslation('weatherLabel')}</strong> ${guide.weather}</p>
+            <p><strong>${getTranslation('timeLabel')}</strong> ${guide.time}</p>
+            <p><strong>${getTranslation('collectionLabel')}</strong> <span class="collection-stars">★★★★★</span></p>
+        </div>
+    `;
+    guideDetailsContainer.innerHTML = detailsHTML;
+    toggleDetailsModal(true);
+};
+
 
 const handleImageFile = (file) => {
   if (!file) return;
@@ -178,13 +210,15 @@ const openEditModal = (index) => {
     modalTitle.textContent = getTranslation('editGuideTitle');
     modalSubmitBtn.textContent = getTranslation('saveBtn');
     
-    toggleModal(true);
+    toggleDetailsModal(false);
+    toggleAddGuideModal(true);
 };
 
 const deleteGuide = (index) => {
     if (confirm(getTranslation('deleteConfirm'))) {
         guides.splice(index, 1);
         localStorage.setItem('guides', JSON.stringify(guides));
+        toggleDetailsModal(false);
         displayGuides();
     }
 };
@@ -211,6 +245,14 @@ const loadInitialData = async () => {
 };
 
 pokedex.addEventListener('click', (e) => {
+    const card = e.target.closest('.pokemon-card');
+    if (card) {
+        const index = card.dataset.index;
+        showDetailsModal(index);
+    }
+});
+
+guideDetailsContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('edit-btn')) {
         const index = e.target.dataset.index;
         openEditModal(index);
@@ -249,12 +291,20 @@ addGuideBtn.addEventListener('click', () => {
     editingGuideIndex = null;
     modalTitle.textContent = getTranslation('addGuideTitle');
     modalSubmitBtn.textContent = getTranslation('addGuideBtn');
-    toggleModal(true);
+    toggleAddGuideModal(true);
 });
-closeBtn.addEventListener('click', () => toggleModal(false));
+
+closeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        toggleAddGuideModal(false);
+        toggleDetailsModal(false);
+    });
+});
+
 window.addEventListener('click', (e) => {
-  if (e.target === modal) {
-    toggleModal(false);
+  if (e.target === addGuideModal || e.target === detailsModal) {
+    toggleAddGuideModal(false);
+    toggleDetailsModal(false);
   }
 });
 
@@ -292,7 +342,7 @@ addGuideForm.addEventListener('submit', (e) => {
 
     localStorage.setItem('guides', JSON.stringify(guides));
     displayGuides();
-    toggleModal(false);
+    toggleAddGuideModal(false);
 });
 
 filterBtns.forEach(btn => {

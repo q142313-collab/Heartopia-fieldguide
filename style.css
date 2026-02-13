@@ -104,47 +104,77 @@ body {
 .pokedex-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .pokemon-card {
   background: #fff;
   border-radius: 20px;
-  padding: 1rem;
+  padding: 1.5rem;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .pokemon-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
 }
 
-.pokemon-card img {
-  width: 100%;
-  height: calc(var(--card-size) * 0.7);
-  object-fit: contain;
-  border-radius: 15px;
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   margin-bottom: 1rem;
 }
 
-.pokemon-card h2 {
-    color: #b38a9a;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+.card-header img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: #fff5f7;
+  border-radius: 15px;
+  padding: 5px;
 }
 
-.pokemon-card p {
-    color: #888;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-.pokemon-card p strong {
-    color: #d19ca9;
+.card-header h2 {
+  font-size: 1.6rem;
+  color: #b38a9a;
+  font-weight: 700;
 }
 
+.card-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem 1.5rem;
+  align-items: center;
+}
+
+.card-details p {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+  color: #888;
+}
+
+.card-details p strong {
+  color: #d19ca9;
+  font-weight: 600;
+}
+
+.card-details .detail-value {
+  font-weight: 600;
+  color: #777;
+}
+
+.collection-stars {
+    color: #ffdde1;
+    font-size: 1.3rem;
+}
+
+/* Modal Styles */
 .modal {
   display: none;
   position: fixed;
@@ -154,8 +184,9 @@ body {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .modal-content {
@@ -167,12 +198,16 @@ body {
   max-width: 500px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   position: relative;
+  animation: fadeIn 0.3s;
 }
 
-.modal-content h2 {
-    text-align: center;
-    color: #b38a9a;
-    margin-bottom: 1.5rem;
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#details-modal-content {
+    padding: 0;
 }
 
 .close-btn {
@@ -183,6 +218,7 @@ body {
   font-size: 35px;
   font-weight: bold;
   transition: color 0.3s ease;
+  z-index: 10;
 }
 
 .close-btn:hover,
@@ -192,6 +228,82 @@ body {
   cursor: pointer;
 }
 
+#guide-details-header {
+    background: linear-gradient(to top, #ffdde1 0%, #ffc7d1 100%);
+    padding: 2rem;
+    text-align: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+#guide-details-header img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    padding: 10px;
+    margin-bottom: 1rem;
+}
+
+#guide-details-header h2 {
+    font-size: 2.5rem;
+    color: #fff;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+#guide-details-body {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+#guide-details-body p {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #555;
+}
+
+#guide-details-body p strong {
+    display: block;
+    color: #d19ca9;
+    margin-bottom: 0.5rem;
+}
+
+#details-modal-actions {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 0.8rem;
+}
+
+.modal-action-btn {
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #b38a9a;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.modal-action-btn:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+/* Form Styles */
 #add-guide-form input, #add-guide-form select {
   width: 100%;
   padding: 12px;
