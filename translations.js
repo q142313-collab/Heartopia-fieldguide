@@ -16,7 +16,7 @@ const translations = {
     submitBtn: "Add Guide",
   },
   ko: {
-    title: "하토피아 필드 가이드",
+    title: "두근두근타운 도감",
     addGuideBtn: "새 가이드 추가",
     category_fish: "어류",
     category_insect: "곤충",

@@ -114,7 +114,7 @@ const parseHTMLAndCreateGuides = (html, category) => {
                     level: cells[2].textContent.trim(),
                     weather: cells[3].textContent.trim(),
                     time: cells[4].textContent.trim(),
-                    image: `.vscode/fieldhuide/${imgSrc}`,
+                    image: `fieldhuide/${imgSrc}`,
                     category: category,
                 });
             }
@@ -126,9 +126,9 @@ const parseHTMLAndCreateGuides = (html, category) => {
 const loadInitialData = async () => {
   if (guides.length === 0) {
     try {
-        const fishHTML = await fetch('.vscode/fieldhuide/어류.html').then(res => res.text());
-        const birdHTML = await fetch('.vscode/fieldhuide/조류.html').then(res => res.text());
-        const insectHTML = await fetch('.vscode/fieldhuide/곤충.html').then(res => res.text());
+        const fishHTML = await fetch('fieldhuide/어류.html').then(res => res.text());
+        const birdHTML = await fetch('fieldhuide/조류.html').then(res => res.text());
+        const insectHTML = await fetch('fieldhuide/곤충.html').then(res => res.text());
 
         const fishGuides = parseHTMLAndCreateGuides(fishHTML, 'fish');
         const birdGuides = parseHTMLAndCreateGuides(birdHTML, 'bird');
