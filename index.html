@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Heartopia Field Guide</title>
-  <link href='/style.css' rel='stylesheet'>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Heartopia Field Guide</h1>
+    <div class="header">
+      <h1 data-translate-key="title">Heartopia Field Guide</h1>
+      <div class="language-switcher">
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ko">KO</button>
+        <button class="lang-btn" data-lang="ja">JA</button>
+      </div>
+    </div>
     <div class="controls">
-      <button id="add-guide-btn">Add Guide</button>
+      <button id="add-guide-btn" data-translate-key="addGuide">Add Guide</button>
       <div class="filters">
-        <button class="filter-btn" data-category="insect">Insect</button>
-        <button class="filter-btn" data-category="fish">Fish</button>
-        <button class="filter-btn" data-category="bird">Bird</button>
+        <button class="filter-btn" data-category="insect" data-translate-key="filterInsect">Insect</button>
+        <button class="filter-btn" data-category="fish" data-translate-key="filterFish">Fish</button>
+        <button class="filter-btn" data-category="bird" data-translate-key="filterBird">Bird</button>
       </div>
     </div>
     <div id="pokedex" class="pokedex-container">
@@ -24,44 +31,29 @@
   <div id="add-guide-modal" class="modal">
     <div class="modal-content">
       <span class="close-btn">&times;</span>
-      <h2>Add New Creature</h2>
+      <h2 data-translate-key="modalTitle">Add a New Guide</h2>
       <form id="add-guide-form">
-        <input type="text" id="creature-name" placeholder="Name" required>
-        <select id="creature-region" required>
-          <option value="" disabled selected>Select Region</option>
-          <option value="grasslands">Grasslands</option>
-          <option value="forest">Forest</option>
-          <option value="mountain">Mountain</option>
-          
-        </select>
-        <input type="text" id="creature-sub-region" placeholder="Sub-region">
-        <input type="number" id="creature-level" placeholder="Level">
-        <select id="creature-weather">
-          <option value="">Any Weather</option>
-          <option value="sunny">Sunny</option>
-          <option value="rainy">Rainy</option>
-          <option value="cloudy">Cloudy</option>
-        </select>
-        <select id="creature-time">
-          <option value="">Any Time</option>
-          <option value="day">Day</option>
-          <option value="night">Night</option>
+        <input type="text" id="creature-name" placeholder="Creature Name" data-translate-key-placeholder="creatureName" required>
+        <input type="text" id="creature-region" placeholder="Region" data-translate-key-placeholder="creatureRegion" required>
+        <input type="text" id="creature-sub-region" placeholder="Sub-region" data-translate-key-placeholder="creatureSubRegion" required>
+        <input type="text" id="creature-level" placeholder="Level" data-translate-key-placeholder="creatureLevel" required>
+        <input type="text" id="creature-weather" placeholder="Weather" data-translate-key-placeholder="creatureWeather" required>
+        <input type="text" id="creature-time" placeholder="Time" data-translate-key-placeholder="creatureTime" required>
+        <select id="creature-category" required>
+          <option value="insect" data-translate-key="filterInsect">Insect</option>
+          <option value="fish" data-translate-key="filterFish">Fish</option>
+          <option value="bird" data-translate-key="filterBird">Bird</option>
         </select>
         <div id="image-drop-zone">
-          <p>Drag & Drop image here or click to select</p>
-          <input type="file" id="creature-image" accept="image/*" required>
+          <p data-translate-key="imageLabel">Drag & Drop image here or click to select</p>
+          <input type="file" id="creature-image" accept="image/*" style="display: none;">
         </div>
-         <select id="creature-category" required>
-          <option value="" disabled selected>Select Category</option>
-          <option value="insect">Insect</option>
-          <option value="fish">Fish</option>
-          <option value="bird">Bird</option>
-        </select>
-        <button type="submit">Save</button>
+        <button type="submit" data-translate-key="submitGuide">Add Guide</button>
       </form>
     </div>
   </div>
 
-  <script defer type="text/javascript" src="/main.js"></script>
+  <script src="translations.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
