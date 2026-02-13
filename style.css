@@ -1,3 +1,7 @@
+:root {
+  --card-size: 280px;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 
 * {
@@ -59,9 +63,10 @@ body {
 .controls {
   margin: 2rem 0;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .filters {
@@ -98,8 +103,9 @@ body {
 
 .pokedex-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
   gap: 2rem;
+  transition: all 0.3s ease-in-out;
 }
 
 .pokemon-card {
@@ -118,7 +124,7 @@ body {
 
 .pokemon-card img {
   width: 100%;
-  height: 200px;
+  height: calc(var(--card-size) * 0.7);
   object-fit: contain;
   border-radius: 15px;
   margin-bottom: 1rem;
@@ -236,4 +242,51 @@ body {
 #add-guide-form button:hover {
     opacity: 0.9;
     box-shadow: 0 5px 15px rgba(184, 198, 229, 0.5);
+}
+
+.size-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.size-controls button {
+    background: rgba(255, 255, 255, 0.5);
+    color: #8b95c2;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.size-controls button:hover {
+    background: #fff;
+    color: #f8cdda;
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+    }
+
+    .filters {
+        order: 2;
+    }
+
+    .size-controls {
+        order: 1;
+        margin-left: 0;
+        margin-bottom: 1rem;
+    }
+
+    #add-guide-btn {
+        order: 3;
+    }
 }

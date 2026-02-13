@@ -8,13 +8,23 @@ const addGuideForm = document.getElementById('add-guide-form');
 const imageDropZone = document.getElementById('image-drop-zone');
 const creatureImageInput = document.getElementById('creature-image');
 const langBtns = document.querySelectorAll('.lang-btn');
+const zoomInBtn = document.getElementById('zoom-in-btn');
+const zoomOutBtn = document.getElementById('zoom-out-btn');
 
 let guides = JSON.parse(localStorage.getItem('guides')) || [];
 let currentFilter = null;
 let currentLang = 'en';
+let currentCardSize = 280;
+const cardSizeStep = 20;
+const minCardSize = 200;
+const maxCardSize = 400;
 
 const getTranslation = (key, lang = currentLang) => {
     return translations[lang][key] || key;
+}
+
+const updateCardSize = () => {
+    document.documentElement.style.setProperty('--card-size', `${currentCardSize}px`);
 }
 
 const setLanguage = (lang) => {
@@ -28,7 +38,6 @@ const setLanguage = (lang) => {
     el.placeholder = getTranslation(key, lang);
   });
 
-  // Update image drop zone text
   const imageDropZoneText = imageDropZone.querySelector('p');
   if (imageDropZoneText) {
       imageDropZoneText.textContent = getTranslation('imageLabel', lang);
@@ -41,7 +50,6 @@ const setLanguage = (lang) => {
     }
   });
 
-  // Re-display guides with the new language
   displayGuides();
 };
 
@@ -50,8 +58,6 @@ const displayGuides = () => {
   const guidesHTMLString = filteredGuides
     .map(
       (guide) => {
-        // For existing data that is not multi-language, just display it.
-        // For new data, we'd need a more robust system, but for now, this will render existing data.
         const name = guide.name[currentLang] || guide.name;
         const region = guide.region[currentLang] || guide.region;
         const subRegion = guide.subRegion[currentLang] || guide.subRegion;
@@ -96,32 +102,53 @@ const parseHTMLAndCreateGuides = (html, category) => {
     const doc = parser.parseFromString(html, 'text/html');
     const rows = doc.querySelectorAll('tr');
     const newGuides = [];
-    // Note: This parsing is specific to the initial Korean HTML files.
+    let lastRegionKo = '';
+    let lastRegionEn = '';
+
     for (let i = 1; i < rows.length; i++) {
         const cells = rows[i].querySelectorAll('td');
-        if (cells.length >= 5) {
-            const imgElement = cells[0].querySelector('img');
-            if (imgElement) {
-                const imgSrc = imgElement.getAttribute('src');
-                const nameKo = cells[1].textContent.trim();
-                // Simple placeholder for English translation
-                const nameEn = `[EN] ${nameKo}`; 
+        if (cells.length < 6) continue;
 
-                newGuides.push({
-                    name: { ko: nameKo, en: nameEn },
-                    region: { ko: '미확인', en: 'Unidentified' },
-                    subRegion: { ko: '미확인', en: 'Unidentified' },
-                    level: cells[2].textContent.trim(),
-                    weather: cells[3].textContent.trim(),
-                    time: cells[4].textContent.trim(),
-                    image: `fieldhuide/${imgSrc}`,
-                    category: category,
-                });
-            }
+        let nameKo, regionKo, subRegionKo, level, weather, time, imgSrc;
+        
+        const imgElement = cells[0].querySelector('img');
+        if (!imgElement) continue;
+        imgSrc = `fieldhuide/${imgElement.getAttribute('src')}`;
+        nameKo = cells[1].textContent.trim();
+
+        if (cells.length === 7) {
+            regionKo = cells[2].textContent.trim();
+            subRegionKo = cells[3].textContent.trim();
+            level = cells[4].textContent.trim();
+            weather = cells[5].textContent.trim();
+            time = cells[6].textContent.trim();
+            lastRegionKo = regionKo;
+        } else { 
+            regionKo = lastRegionKo;
+            subRegionKo = cells[2].textContent.trim();
+            level = cells[3].textContent.trim();
+            weather = cells[4].textContent.trim();
+            time = cells[5].textContent.trim();
         }
+
+        const nameEn = `[EN] ${nameKo}`;
+        const regionEn = `[EN] ${regionKo}`;
+        const subRegionEn = `[EN] ${subRegionKo}`;
+
+        newGuides.push({
+            name: { ko: nameKo, en: nameEn },
+            region: { ko: regionKo, en: regionEn },
+            subRegion: { ko: subRegionKo, en: subRegionEn },
+            level: level,
+            weather: weather,
+            time: time,
+            image: imgSrc,
+            category: category,
+        });
     }
     return newGuides;
 };
+
 
 const loadInitialData = async () => {
   if (guides.length === 0) {
@@ -140,9 +167,23 @@ const loadInitialData = async () => {
         console.error("Error loading initial data:", error);
     }
   }
-  // Set initial language and display
   setLanguage(currentLang);
+  updateCardSize();
 };
+
+zoomInBtn.addEventListener('click', () => {
+    if (currentCardSize < maxCardSize) {
+        currentCardSize += cardSizeStep;
+        updateCardSize();
+    }
+});
+
+zoomOutBtn.addEventListener('click', () => {
+    if (currentCardSize > minCardSize) {
+        currentCardSize -= cardSizeStep;
+        updateCardSize();
+    }
+});
 
 imageDropZone.addEventListener('click', () => creatureImageInput.click());
 creatureImageInput.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
@@ -189,7 +230,6 @@ addGuideForm.addEventListener('submit', (e) => {
   const regionInput = document.getElementById('creature-region').value;
   const subRegionInput = document.getElementById('creature-sub-region').value;
 
-  // Save the input in the current language and provide a fallback for the other.
   if (currentLang === 'en') {
       newGuide.name = { en: nameInput, ko: `[번역 필요] ${nameInput}` };
       newGuide.region = { en: regionInput, ko: `[번역 필요] ${regionInput}` };
