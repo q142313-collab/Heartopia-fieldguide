@@ -1,54 +1,49 @@
 const pokedex = document.getElementById('pokedex');
-const searchBar = document.getElementById('search-bar');
+const addGuideBtn = document.getElementById('add-guide-btn');
+const filterBtns = document.querySelectorAll('.filter-btn');
 
-let pokemonData = [];
+let guides = JSON.parse(localStorage.getItem('guides')) || [];
+let currentFilter = null;
 
-const fetchPokemon = async () => {
-  const url = `https://pokeapi.co/api/v2/pokemon?limit=151`;
-  const res = await fetch(url);
-  const data = await res.json();
-  const pokemon = data.results.map((result, index) => ({
-    ...result,
-    id: index + 1,
-    image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`,
-  }));
-  pokemonData = await Promise.all(pokemon.map(p => fetchPokemonData(p)));
-  displayPokemon(pokemonData);
-};
-
-const fetchPokemonData = async (p) => {
-    const res = await fetch(p.url);
-    const data = await res.json();
-    return {
-        ...p,
-        types: data.types.map(typeInfo => typeInfo.type.name)
-    };
-}
-
-const displayPokemon = (pokemon) => {
-  const pokemonHTMLString = pokemon
+const displayGuides = () => {
+  const filteredGuides = currentFilter ? guides.filter(guide => guide.category === currentFilter) : guides;
+  const guidesHTMLString = filteredGuides
     .map(
-      (p) => `
+      (guide) => `
     <div class="pokemon-card">
-      <img src="${p.image}" />
-      <h2 class="card-title">${p.id}. ${p.name}</h2>
-      <p class="card-subtitle">${p.types.map(type => `<span class=\"type type-${type}\">${type}</span>`).join(' ')}</p>
+      <img src="${guide.image}" />
+      <h2>${guide.name}</h2>
     </div>
     `
     )
     .join('');
-  pokedex.innerHTML = pokemonHTMLString;
+  pokedex.innerHTML = guidesHTMLString;
 };
 
-searchBar.addEventListener('keyup', (e) => {
-  const searchString = e.target.value.toLowerCase();
-  const filteredPokemon = pokemonData.filter((p) => {
-    return (
-      p.name.toLowerCase().includes(searchString) ||
-      p.id.toString().includes(searchString)
-    );
-  });
-  displayPokemon(filteredPokemon);
+const addGuide = () => {
+  const name = prompt('Enter the name of the creature:');
+  const image = prompt('Enter the image URL of the creature:');
+  const category = prompt('Enter the category (insect, fish, or bird):');
+
+  if (name && image && category) {
+    guides.push({ name, image, category });
+    localStorage.setItem('guides', JSON.stringify(guides));
+    displayGuides();
+  }
+};
+
+const filterByCategory = (category) => {
+  if (currentFilter === category) {
+    currentFilter = null;
+  } else {
+    currentFilter = category;
+  }
+  displayGuides();
+};
+
+addGuideBtn.addEventListener('click', addGuide);
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => filterByCategory(btn.dataset.category));
 });
 
-fetchPokemon();
+displayGuides();
