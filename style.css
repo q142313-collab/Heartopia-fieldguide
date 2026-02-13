@@ -17,6 +17,10 @@ body {
   min-height: 100vh;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -115,11 +119,50 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
   cursor: pointer;
+  position: relative;
 }
 
 .pokemon-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-actions-corner {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.pokemon-card:hover .card-actions-corner {
+    opacity: 1;
+}
+
+.card-action-btn {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid #eee;
+    width: calc(var(--card-size) * 0.12);
+    height: calc(var(--card-size) * 0.12);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(var(--card-size) * 0.05);
+    color: #aaa;
+    z-index: 5;
+}
+
+.card-action-btn:hover {
+    background: #fff;
+    color: #888;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .card-header {
@@ -130,8 +173,8 @@ body {
 }
 
 .card-header img {
-  width: 80px;
-  height: 80px;
+  width: calc(var(--card-size) * 0.28);
+  height: calc(var(--card-size) * 0.28);
   object-fit: contain;
   background: #fff5f7;
   border-radius: 15px;
@@ -139,7 +182,7 @@ body {
 }
 
 .card-header h2 {
-  font-size: 1.6rem;
+  font-size: calc(var(--card-size) * 0.06);
   color: #b38a9a;
   font-weight: 700;
 }
@@ -155,7 +198,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  font-size: 0.95rem;
+  font-size: calc(var(--card-size) * 0.038);
   color: #888;
 }
 
@@ -169,10 +212,17 @@ body {
   color: #777;
 }
 
-.collection-stars {
+.collection-stars .star {
+    font-size: calc(var(--card-size) * 0.055);
     color: #ffdde1;
-    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.2s;
 }
+
+.collection-stars .star.filled {
+    color: #ffd055;
+}
+
 
 /* Modal Styles */
 .modal {
@@ -192,13 +242,14 @@ body {
 .modal-content {
   background: #fff;
   margin: 10% auto;
-  padding: 2.5rem;
   border-radius: 20px;
   width: 90%;
   max-width: 500px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   position: relative;
   animation: fadeIn 0.3s;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -273,6 +324,15 @@ body {
     margin-bottom: 0.5rem;
 }
 
+#guide-details-body .collection-stars:hover .star {
+    color: #ffd972;
+}
+
+#guide-details-body .collection-stars .star:hover ~ .star {
+    color: #ffdde1;
+}
+
+
 #details-modal-actions {
     position: absolute;
     top: 20px;
@@ -304,6 +364,15 @@ body {
 }
 
 /* Form Styles */
+#add-guide-form {
+    padding: 2.5rem;
+}
+
+#add-guide-modal .modal-content {
+    overflow-y: initial;
+    padding: 0;
+}
+
 #add-guide-form input, #add-guide-form select {
   width: 100%;
   padding: 12px;

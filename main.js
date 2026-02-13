@@ -1,4 +1,3 @@
-
 const pokedex = document.getElementById('pokedex');
 const addGuideBtn = document.getElementById('add-guide-btn');
 const filterBtns = document.querySelectorAll('.filter-btn');
@@ -25,62 +24,69 @@ const getTranslation = (key, lang = currentLang) => {
 }
 
 const updateCardSize = () => {
+    currentCardSize = sizeSlider.value;
     document.documentElement.style.setProperty('--card-size', `${currentCardSize}px`);
 }
 
 const setLanguage = (lang) => {
-  currentLang = lang;
-  document.querySelectorAll('[data-translate-key]').forEach(el => {
-    const key = el.dataset.translateKey;
-    el.textContent = getTranslation(key, lang);
-  });
-  document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
-    const key = el.dataset.translateKeyPlaceholder;
-    el.placeholder = getTranslation(key, lang);
-  });
+    currentLang = lang;
+    document.querySelectorAll('[data-translate-key]').forEach(el => {
+        const key = el.dataset.translateKey;
+        if(el.tagName === 'H2' && el.id === 'modal-title') return; // Don't translate this one here
+        el.textContent = getTranslation(key, lang);
+    });
+    document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+        const key = el.dataset.translateKeyPlaceholder;
+        el.placeholder = getTranslation(key, lang);
+    });
 
-  const imageDropZoneText = imageDropZone.querySelector('p');
-  if (imageDropZoneText) {
-      imageDropZoneText.textContent = getTranslation('imageLabel', lang);
-  }
-
-  langBtns.forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.lang === lang) {
-      btn.classList.add('active');
+    const imageDropZoneText = imageDropZone.querySelector('p');
+    if (imageDropZoneText) {
+        imageDropZoneText.textContent = getTranslation('imageLabel', lang);
     }
-  });
 
-  displayGuides();
+    langBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+
+    displayGuides();
 };
 
 const displayGuides = () => {
-  const filteredGuides = currentFilter ? guides.filter(guide => guide.category === currentFilter) : guides;
-  const guidesHTMLString = filteredGuides.map((guide, index) => {
-      const name = guide.name[currentLang] || guide.name;
-      const region = guide.region[currentLang] || guide.region;
-      const subRegion = guide.subRegion[currentLang] || guide.subRegion;
+    const filteredGuides = currentFilter ? guides.filter(guide => guide.category === currentFilter) : guides;
+    const guidesHTMLString = filteredGuides.map((guide, index) => {
+        const name = guide.name[currentLang] || guide.name;
+        const region = guide.region[currentLang] || guide.region;
+        const subRegion = guide.subRegion[currentLang] || guide.subRegion;
+        const collectionStars = Array(5).fill(0).map((_, i) => `<span class="star ${i < (guide.collection || 0) ? 'filled' : ''}" data-rating="${i + 1}">★</span>`).join('');
 
-      return `
-      <div class="pokemon-card" data-index="${index}">
-        <div class="card-header">
-          <img src="${guide.image}" alt="${name}">
-          <h2>${name}</h2>
+        return `
+        <div class="pokemon-card" data-index="${index}">
+            <div class="card-actions-corner">
+                <button class="card-action-btn edit-btn" data-index="${index}" title="Edit">✏️</button>
+                <button class="card-action-btn delete-btn" data-index="${index}" title="Delete">🗑️</button>
+            </div>
+            <div class="card-content-wrapper">
+                <div class="card-header">
+                    <img src="${guide.image}" alt="${name}">
+                    <h2>${name}</h2>
+                </div>
+                <div class="card-details">
+                    <p><strong><img src="https://i.ibb.co/L8DR0cZ/region.png" width="16"/> ${getTranslation('regionLabel')}:</strong> <span class="detail-value">${region}</span></p>
+                    <p><strong><img src="https://i.ibb.co/c12V3Jd/subregion.png" width="16"/> ${getTranslation('subRegionLabel')}:</strong> <span class="detail-value">${subRegion}</span></p>
+                    <p><strong><img src="https://i.ibb.co/9g3v4f5/level.png" width="16"/> ${getTranslation('levelLabel')}:</strong> <span class="detail-value">${guide.level}</span></p>
+                    <p><strong><img src="https://i.ibb.co/XY3gJvM/collection.png" width="16"/> ${getTranslation('collectionLabel')}:</strong> <span class="collection-stars">${collectionStars}</span></p>
+                </div>
+            </div>
         </div>
-        <div class="card-details">
-          <p><strong><img src="https://i.ibb.co/L8DR0cZ/region.png" width="16"/> ${getTranslation('regionLabel')}:</strong> <span class="detail-value">${region}</span></p>
-          <p><strong><img src="https://i.ibb.co/c12V3Jd/subregion.png" width="16"/> ${getTranslation('subRegionLabel')}:</strong> <span class="detail-value">${subRegion}</span></p>
-          <p><strong><img src="https://i.ibb.co/9g3v4f5/level.png" width="16"/> ${getTranslation('levelLabel')}:</strong> <span class="detail-value">${guide.level}</span></p>
-          <p><strong><img src="https://i.ibb.co/XY3gJvM/collection.png" width="16"/> ${getTranslation('collectionLabel')}:</strong> <span class="collection-stars">★★★★★</span></p>
-        </div>
-      </div>
-      `;
+        `;
     }).join('');
-  pokedex.innerHTML = guidesHTMLString;
+    pokedex.innerHTML = guidesHTMLString;
 };
 
-const toggleAddGuideModal = (show) => {
-    addGuideModal.style.display = show ? 'block' : 'none';
+const toggleModal = (modal, show) => {
+    modal.style.display = show ? 'block' : 'none';
+    document.body.classList.toggle('modal-open', show);
     if (!show) {
         editingGuideIndex = null;
         addGuideForm.reset();
@@ -92,10 +98,6 @@ const toggleAddGuideModal = (show) => {
     }
 };
 
-const toggleDetailsModal = (show) => {
-    detailsModal.style.display = show ? 'block' : 'none';
-};
-
 const showDetailsModal = (index) => {
     const guide = guides[index];
     if (!guide) return;
@@ -103,11 +105,12 @@ const showDetailsModal = (index) => {
     const name = guide.name[currentLang] || guide.name;
     const region = guide.region[currentLang] || guide.region;
     const subRegion = guide.subRegion[currentLang] || guide.subRegion;
+    const collectionStars = Array(5).fill(0).map((_, i) => `<span class="star ${i < (guide.collection || 0) ? 'filled' : ''}" data-rating="${i + 1}">★</span>`).join('');
 
     const detailsHTML = `
         <div id="details-modal-actions">
-            <button class="modal-action-btn edit-btn" data-index="${index}">✏️</button>
-            <button class="modal-action-btn delete-btn" data-index="${index}">🗑️</button>
+            <button class="modal-action-btn edit-btn" data-index="${index}" title="Edit">✏️</button>
+            <button class="modal-action-btn delete-btn" data-index="${index}" title="Delete">🗑️</button>
         </div>
         <div id="guide-details-header">
             <img src="${guide.image}" alt="${name}" />
@@ -119,25 +122,24 @@ const showDetailsModal = (index) => {
             <p><strong>${getTranslation('levelLabel')}</strong> ${guide.level}</p>
             <p><strong>${getTranslation('weatherLabel')}</strong> ${guide.weather}</p>
             <p><strong>${getTranslation('timeLabel')}</strong> ${guide.time}</p>
-            <p><strong>${getTranslation('collectionLabel')}</strong> <span class="collection-stars">★★★★★</span></p>
+            <p><strong>${getTranslation('collectionLabel')}</strong> <span class="collection-stars" data-index="${index}">${collectionStars}</span></p>
         </div>
     `;
     guideDetailsContainer.innerHTML = detailsHTML;
-    toggleDetailsModal(true);
+    toggleModal(detailsModal, true);
 };
 
-
 const handleImageFile = (file) => {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    creatureImageInput.dataset.url = e.target.result;
-    const dropZoneText = imageDropZone.querySelector('p');
-    if (dropZoneText) {
-        dropZoneText.textContent = file.name;
-    }
-  };
-  reader.readAsDataURL(file);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        creatureImageInput.dataset.url = e.target.result;
+        const dropZoneText = imageDropZone.querySelector('p');
+        if (dropZoneText) {
+            dropZoneText.textContent = file.name;
+        }
+    };
+    reader.readAsDataURL(file);
 };
 
 const parseHTMLAndCreateGuides = (html, category) => {
@@ -156,19 +158,21 @@ const parseHTMLAndCreateGuides = (html, category) => {
         imgSrc = `fieldhuide/${imgElement.getAttribute('src')}`;
         nameKo = cells[1].textContent.trim();
 
+        const getCellText = (index) => cells[index] ? cells[index].textContent.trim() : '';
+
         if (cells.length === 7) {
-            regionKo = cells[2].textContent.trim();
-            subRegionKo = cells[3].textContent.trim();
-            level = cells[4].textContent.trim();
-            weather = cells[5].textContent.trim();
-            time = cells[6].textContent.trim();
+            regionKo = getCellText(2);
+            subRegionKo = getCellText(3);
+            level = getCellText(4);
+            weather = getCellText(5);
+            time = getCellText(6);
             lastRegionKo = regionKo;
         } else if (cells.length === 6) {
             regionKo = lastRegionKo;
-            subRegionKo = cells[2].textContent.trim();
-            level = cells[3].textContent.trim();
-            weather = cells[4].textContent.trim();
-            time = cells[5].textContent.trim();
+            subRegionKo = getCellText(2);
+            level = getCellText(3);
+            weather = getCellText(4);
+            time = getCellText(5);
         } else {
             continue;
         }
@@ -182,6 +186,7 @@ const parseHTMLAndCreateGuides = (html, category) => {
             time: time,
             image: imgSrc,
             category: category,
+            collection: 0,
         });
     }
     return newGuides;
@@ -210,102 +215,116 @@ const openEditModal = (index) => {
     modalTitle.textContent = getTranslation('editGuideTitle');
     modalSubmitBtn.textContent = getTranslation('saveBtn');
     
-    toggleDetailsModal(false);
-    toggleAddGuideModal(true);
+    if (detailsModal.style.display === 'block') {
+        toggleModal(detailsModal, false);
+    }
+    toggleModal(addGuideModal, true);
 };
 
 const deleteGuide = (index) => {
     if (confirm(getTranslation('deleteConfirm'))) {
         guides.splice(index, 1);
         localStorage.setItem('guides', JSON.stringify(guides));
-        toggleDetailsModal(false);
+        if (detailsModal.style.display === 'block') {
+            toggleModal(detailsModal, false);
+        }
         displayGuides();
     }
 };
 
 const loadInitialData = async () => {
-  if (guides.length === 0) {
-    try {
-        const fishHTML = await fetch('fieldhuide/어류.html').then(res => res.text());
-        const birdHTML = await fetch('fieldhuide/조류.html').then(res => res.text());
-        const insectHTML = await fetch('fieldhuide/곤충.html').then(res => res.text());
+    if (guides.length === 0) {
+        try {
+            const [fishHTML, birdHTML, insectHTML] = await Promise.all([
+                fetch('fieldhuide/어류.html').then(res => res.text()),
+                fetch('fieldhuide/조류.html').then(res => res.text()),
+                fetch('fieldhuide/곤충.html').then(res => res.text())
+            ]);
 
-        const fishGuides = parseHTMLAndCreateGuides(fishHTML, 'fish');
-        const birdGuides = parseHTMLAndCreateGuides(birdHTML, 'bird');
-        const insectGuides = parseHTMLAndCreateGuides(insectHTML, 'insect');
+            const fishGuides = parseHTMLAndCreateGuides(fishHTML, 'fish');
+            const birdGuides = parseHTMLAndCreateGuides(birdHTML, 'bird');
+            const insectGuides = parseHTMLAndCreateGuides(insectHTML, 'insect');
 
-        guides = [...fishGuides, ...birdGuides, ...insectGuides];
-        localStorage.setItem('guides', JSON.stringify(guides));
-    } catch (error) {
-        console.error("Error loading initial data:", error);
+            guides = [...fishGuides, ...birdGuides, ...insectGuides];
+            localStorage.setItem('guides', JSON.stringify(guides));
+        } catch (error) {
+            console.error("Error loading initial data:", error);
+        }
     }
-  }
-  setLanguage(currentLang);
-  updateCardSize();
+    setLanguage(currentLang);
+    updateCardSize();
 };
 
+// Event Listeners using Delegation
 pokedex.addEventListener('click', (e) => {
     const card = e.target.closest('.pokemon-card');
-    if (card) {
-        const index = card.dataset.index;
+    if (!card) return;
+    
+    const index = card.dataset.index;
+
+    if (e.target.closest('.edit-btn')) {
+        e.stopPropagation();
+        openEditModal(index);
+    } else if (e.target.closest('.delete-btn')) {
+        e.stopPropagation();
+        deleteGuide(index);
+    } else {
         showDetailsModal(index);
     }
 });
 
 guideDetailsContainer.addEventListener('click', (e) => {
-    if (e.target.classList.contains('edit-btn')) {
-        const index = e.target.dataset.index;
-        openEditModal(index);
-    }
-    if (e.target.classList.contains('delete-btn')) {
-        const index = e.target.dataset.index;
-        deleteGuide(index);
+    const index = e.target.closest('.collection-stars')?.dataset.index;
+    const star = e.target.closest('.star');
+    
+    if (star && index !== undefined) {
+        const rating = parseInt(star.dataset.rating, 10);
+        const currentRating = guides[index].collection || 0;
+        guides[index].collection = rating === currentRating ? 0 : rating;
+        localStorage.setItem('guides', JSON.stringify(guides));
+        showDetailsModal(index); // Re-render the modal content
+        displayGuides(); // Update the main card list as well
+    } else if (e.target.closest('.edit-btn')) {
+        const editIndex = e.target.closest('.edit-btn').dataset.index;
+        openEditModal(editIndex);
+    } else if (e.target.closest('.delete-btn')) {
+        const deleteIndex = e.target.closest('.delete-btn').dataset.index;
+        deleteGuide(deleteIndex);
     }
 });
 
-sizeSlider.addEventListener('input', (e) => {
-    currentCardSize = e.target.value;
-    updateCardSize();
-});
+sizeSlider.addEventListener('input', updateCardSize);
 
 imageDropZone.addEventListener('click', () => creatureImageInput.click());
 creatureImageInput.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
 
-imageDropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  imageDropZone.style.borderColor = '#b8c6e5';
-});
-
-imageDropZone.addEventListener('dragleave', (e) => {
-  e.preventDefault();
-  imageDropZone.style.borderColor = '#e0e0e0';
-});
-
-imageDropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  imageDropZone.style.borderColor = '#e0e0e0';
-  handleImageFile(e.dataTransfer.files[0]);
+['dragover', 'dragleave', 'drop'].forEach(eventName => {
+    imageDropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (eventName === 'dragover') imageDropZone.style.borderColor = '#ffc7d1';
+        if (eventName === 'dragleave' || eventName === 'drop') imageDropZone.style.borderColor = '#e0e0e0';
+        if (eventName === 'drop') handleImageFile(e.dataTransfer.files[0]);
+    });
 });
 
 addGuideBtn.addEventListener('click', () => {
     editingGuideIndex = null;
     modalTitle.textContent = getTranslation('addGuideTitle');
     modalSubmitBtn.textContent = getTranslation('addGuideBtn');
-    toggleAddGuideModal(true);
+    toggleModal(addGuideModal, true);
 });
 
 closeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        toggleAddGuideModal(false);
-        toggleDetailsModal(false);
+        toggleModal(btn.closest('.modal'), false);
     });
 });
 
 window.addEventListener('click', (e) => {
-  if (e.target === addGuideModal || e.target === detailsModal) {
-    toggleAddGuideModal(false);
-    toggleDetailsModal(false);
-  }
+    if (e.target === addGuideModal || e.target === detailsModal) {
+        toggleModal(e.target, false);
+    }
 });
 
 addGuideForm.addEventListener('submit', (e) => {
@@ -330,42 +349,45 @@ addGuideForm.addEventListener('submit', (e) => {
         guideData.subRegion = { ...originalGuide.subRegion, [currentLang]: subRegionInput };
         guides[editingGuideIndex] = { ...originalGuide, ...guideData };
     } else {
-        guideData.name = { en: `[Needs Translation] ${nameInput}`, ko: nameInput };
-        guideData.region = { en: `[Needs Translation] ${regionInput}`, ko: regionInput };
-        guideData.subRegion = { en: `[Needs Translation] ${subRegionInput}`, ko: subRegionInput };
-        guideData.name[currentLang] = nameInput;
-        guideData.region[currentLang] = regionInput;
-        guideData.subRegion[currentLang] = subRegionInput;
-
-        guides.push(guideData);
+        const newGuide = {
+            ...guideData,
+            name: { en: `[EN] ${nameInput}`, ko: nameInput },
+            region: { en: `[EN] ${regionInput}`, ko: regionInput },
+            subRegion: { en: `[EN] ${subRegionInput}`, ko: subRegionInput },
+            collection: 0,
+        };
+        newGuide.name[currentLang] = nameInput;
+        newGuide.region[currentLang] = regionInput;
+        newGuide.subRegion[currentLang] = subRegionInput;
+        guides.push(newGuide);
     }
 
     localStorage.setItem('guides', JSON.stringify(guides));
     displayGuides();
-    toggleAddGuideModal(false);
+    toggleModal(addGuideModal, false);
 });
 
 filterBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const category = btn.dataset.category;
-    filterBtns.forEach(b => b.classList.remove('active'));
-    
-    if (currentFilter === category) {
-      currentFilter = null;
-    } else {
-      currentFilter = category;
-      btn.classList.add('active');
-    }
-    
-    displayGuides();
-  });
+    btn.addEventListener('click', () => {
+        const category = btn.dataset.category;
+        filterBtns.forEach(b => b.classList.remove('active'));
+        
+        if (currentFilter === category) {
+            currentFilter = null;
+        } else {
+            currentFilter = category;
+            btn.classList.add('active');
+        }
+        
+        displayGuides();
+    });
 });
 
 langBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const lang = btn.dataset.lang;
-    setLanguage(lang);
-  });
+    btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        setLanguage(lang);
+    });
 });
 
 loadInitialData();
