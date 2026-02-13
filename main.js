@@ -8,8 +8,7 @@ const addGuideForm = document.getElementById('add-guide-form');
 const imageDropZone = document.getElementById('image-drop-zone');
 const creatureImageInput = document.getElementById('creature-image');
 const langBtns = document.querySelectorAll('.lang-btn');
-const zoomInBtn = document.getElementById('zoom-in-btn');
-const zoomOutBtn = document.getElementById('zoom-out-btn');
+const sizeSlider = document.getElementById('size-slider');
 const modalTitle = document.getElementById('modal-title');
 const modalSubmitBtn = document.getElementById('modal-submit-btn');
 
@@ -17,9 +16,6 @@ let guides = JSON.parse(localStorage.getItem('guides')) || [];
 let currentFilter = null;
 let currentLang = 'en';
 let currentCardSize = 280;
-const cardSizeStep = 20;
-const minCardSize = 150;
-const maxCardSize = 400;
 let editingGuideIndex = null;
 
 const getTranslation = (key, lang = currentLang) => {
@@ -225,18 +221,9 @@ pokedex.addEventListener('click', (e) => {
     }
 });
 
-zoomInBtn.addEventListener('click', () => {
-    if (currentCardSize < maxCardSize) {
-        currentCardSize += cardSizeStep;
-        updateCardSize();
-    }
-});
-
-zoomOutBtn.addEventListener('click', () => {
-    if (currentCardSize > minCardSize) {
-        currentCardSize -= cardSizeStep;
-        updateCardSize();
-    }
+sizeSlider.addEventListener('input', (e) => {
+    currentCardSize = e.target.value;
+    updateCardSize();
 });
 
 imageDropZone.addEventListener('click', () => creatureImageInput.click());
