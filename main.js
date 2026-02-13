@@ -1,84 +1,54 @@
-const generateBtn = document.getElementById('generate-btn');
-const lottoNumbersContainer = document.getElementById('lotto-numbers');
-const themeToggle = document.getElementById('checkbox');
-const body = document.body;
+const pokedex = document.getElementById('pokedex');
+const searchBar = document.getElementById('search-bar');
 
-// --- THEME LOGIC ---
-const applyTheme = (theme) => {
-  if (theme === 'dark') {
-    body.classList.add('dark-mode');
-    themeToggle.checked = true;
-  } else {
-    body.classList.remove('dark-mode');
-    themeToggle.checked = false;
-  }
+let pokemonData = [];
+
+const fetchPokemon = async () => {
+  const url = `https://pokeapi.co/api/v2/pokemon?limit=151`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const pokemon = data.results.map((result, index) => ({
+    ...result,
+    id: index + 1,
+    image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`,
+  }));
+  pokemonData = await Promise.all(pokemon.map(p => fetchPokemonData(p)));
+  displayPokemon(pokemonData);
 };
 
-const toggleTheme = () => {
-  const currentTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-  applyTheme(currentTheme);
-  localStorage.setItem('theme', currentTheme);
+const fetchPokemonData = async (p) => {
+    const res = await fetch(p.url);
+    const data = await res.json();
+    return {
+        ...p,
+        types: data.types.map(typeInfo => typeInfo.type.name)
+    };
+}
+
+const displayPokemon = (pokemon) => {
+  const pokemonHTMLString = pokemon
+    .map(
+      (p) => `
+    <div class="pokemon-card">
+      <img src="${p.image}" />
+      <h2 class="card-title">${p.id}. ${p.name}</h2>
+      <p class="card-subtitle">${p.types.map(type => `<span class=\"type type-${type}\">${type}</span>`).join(' ')}</p>
+    </div>
+    `
+    )
+    .join('');
+  pokedex.innerHTML = pokemonHTMLString;
 };
 
-themeToggle.addEventListener('change', toggleTheme);
-
-// On page load, apply saved theme or OS preference
-document.addEventListener('DOMContentLoaded', () => {
-  const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  if (savedTheme) {
-    applyTheme(savedTheme);
-  } else if (prefersDark) {
-    applyTheme('dark');
-  } else {
-    applyTheme('light');
-  }
-});
-
-
-// --- LOTTO LOGIC ---
-const getNumberColor = (number) => {
-  if (number <= 10) return '#fbc400'; // Yellow
-  if (number <= 20) return '#69c8f2'; // Blue
-  if (number <= 30) return '#ff7272'; // Red
-  if (number <= 40) return '#aaa'; // Gray
-  return '#b0d840'; // Green
-};
-
-generateBtn.addEventListener('click', () => {
-  lottoNumbersContainer.innerHTML = '';
-  const numbers = new Set();
-  while(numbers.size < 6) {
-    numbers.add(Math.floor(Math.random() * 45) + 1);
-  }
-
-  const sortedNumbers = Array.from(numbers).sort((a, b) => a - b);
-
-  sortedNumbers.forEach(number => {
-    const ball = document.createElement('div');
-    ball.className = 'lotto-ball';
-    ball.style.backgroundColor = getNumberColor(number);
-    ball.textContent = number;
-    lottoNumbersContainer.appendChild(ball);
+searchBar.addEventListener('keyup', (e) => {
+  const searchString = e.target.value.toLowerCase();
+  const filteredPokemon = pokemonData.filter((p) => {
+    return (
+      p.name.toLowerCase().includes(searchString) ||
+      p.id.toString().includes(searchString)
+    );
   });
+  displayPokemon(filteredPokemon);
 });
 
-// --- MODAL LOGIC ---
-const modal = document.getElementById('contactModal');
-const openBtn = document.getElementById('contact-btn');
-const closeBtn = document.getElementsByClassName('close-btn')[0];
-
-openBtn.onclick = () => {
-  modal.style.display = 'block';
-}
-
-closeBtn.onclick = () => {
-  modal.style.display = 'none';
-}
-
-window.onclick = (event) => {
-  if (event.target == modal) {
-    modal.style.display = 'none';
-  }
-}
+fetchPokemon();
