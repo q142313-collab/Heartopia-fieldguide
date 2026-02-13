@@ -8,24 +8,26 @@
 </head>
 <body>
   <div class="container">
-    <div class="header">
+    <header class="header">
       <h1 data-translate-key="title">Heartopia Field Guide</h1>
       <div class="language-switcher">
         <button class="lang-btn" data-lang="en">EN</button>
         <button class="lang-btn" data-lang="ko">KO</button>
         <button class="lang-btn" data-lang="ja">JA</button>
       </div>
-    </div>
-    <div class="controls">
-      <button id="add-guide-btn" data-translate-key="addGuide">Add Guide</button>
-      <div class="filters">
-        <button class="filter-btn" data-category="insect" data-translate-key="filterInsect">Insect</button>
-        <button class="filter-btn" data-category="fish" data-translate-key="filterFish">Fish</button>
-        <button class="filter-btn" data-category="bird" data-translate-key="filterBird">Bird</button>
-      </div>
-    </div>
-    <div id="pokedex" class="pokedex-container">
-    </div>
+    </header>
+    <main>
+        <div class="controls">
+          <button id="add-guide-btn" data-translate-key="addGuide">Add Guide</button>
+          <div class="filters">
+            <button class="filter-btn" data-category="insect" data-translate-key="filterInsect">Insect</button>
+            <button class="filter-btn" data-category="fish" data-translate-key="filterFish">Fish</button>
+            <button class="filter-btn" data-category="bird" data-translate-key="filterBird">Bird</button>
+          </div>
+        </div>
+        <div id="pokedex" class="pokedex-container">
+        </div>
+    </main>
   </div>
 
   <div id="add-guide-modal" class="modal">
