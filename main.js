@@ -14,10 +14,25 @@ const modalSubmitBtn = document.getElementById('modal-submit-btn');
 const guideDetailsContainer = document.getElementById('guide-details');
 
 let guides = JSON.parse(localStorage.getItem('guides')) || [];
-let currentFilter = null;
-let currentLang = 'en';
-let currentCardSize = 280;
 let editingGuideIndex = null;
+
+// --- Settings Management ---
+const loadSettings = () => {
+    const savedSettings = JSON.parse(localStorage.getItem('appSettings'));
+    return {
+        lang: savedSettings?.lang || 'en',
+        filter: savedSettings?.filter || null,
+        cardSize: savedSettings?.cardSize || 280
+    };
+};
+
+const saveSettings = () => {
+    const settings = { lang: currentLang, filter: currentFilter, cardSize: currentCardSize };
+    localStorage.setItem('appSettings', JSON.stringify(settings));
+};
+
+let { lang: currentLang, filter: currentFilter, cardSize: currentCardSize } = loadSettings();
+// -------------------------
 
 const getTranslation = (key, lang = currentLang) => {
     return translations[lang][key] || key;
@@ -26,25 +41,19 @@ const getTranslation = (key, lang = currentLang) => {
 const updateCardSize = () => {
     currentCardSize = sizeSlider.value;
     document.documentElement.style.setProperty('--card-size', `${currentCardSize}px`);
+    saveSettings();
 }
 
 const setLanguage = (lang) => {
     currentLang = lang;
+    saveSettings();
+
     document.querySelectorAll('[data-translate-key]').forEach(el => {
         const key = el.dataset.translateKey;
-        if(el.tagName === 'H2' && el.id === 'modal-title') return; // Don't translate this one here
+        if(el.closest('#add-guide-form')) return; // Defer form translation to when it opens
         el.textContent = getTranslation(key, lang);
     });
-    document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
-        const key = el.dataset.translateKeyPlaceholder;
-        el.placeholder = getTranslation(key, lang);
-    });
-
-    const imageDropZoneText = imageDropZone.querySelector('p');
-    if (imageDropZoneText) {
-        imageDropZoneText.textContent = getTranslation('imageLabel', lang);
-    }
-
+    
     langBtns.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
@@ -63,8 +72,8 @@ const displayGuides = () => {
         return `
         <div class="pokemon-card" data-index="${index}">
             <div class="card-actions-corner">
-                <button class="card-action-btn edit-btn" data-index="${index}" title="Edit">✏️</button>
-                <button class="card-action-btn delete-btn" data-index="${index}" title="Delete">🗑️</button>
+                <button class="card-action-btn edit-btn" data-index="${index}" title="${getTranslation('editBtn')}">✏️</button>
+                <button class="card-action-btn delete-btn" data-index="${index}" title="${getTranslation('deleteBtn')}">🗑️</button>
             </div>
             <div class="card-content-wrapper">
                 <div class="card-header">
@@ -109,8 +118,8 @@ const showDetailsModal = (index) => {
 
     const detailsHTML = `
         <div id="details-modal-actions">
-            <button class="modal-action-btn edit-btn" data-index="${index}" title="Edit">✏️</button>
-            <button class="modal-action-btn delete-btn" data-index="${index}" title="Delete">🗑️</button>
+            <button class="modal-action-btn edit-btn" data-index="${index}" title="${getTranslation('editBtn')}">✏️</button>
+            <button class="modal-action-btn delete-btn" data-index="${index}" title="${getTranslation('deleteBtn')}">🗑️</button>
         </div>
         <div id="guide-details-header">
             <img src="${guide.image}" alt="${name}" />
@@ -151,13 +160,14 @@ const parseHTMLAndCreateGuides = (html, category) => {
 
     for (let i = 1; i < rows.length; i++) {
         const cells = rows[i].querySelectorAll('td');
-        let nameKo, regionKo, subRegionKo, level, weather, time, imgSrc;
+        if (cells.length < 6) continue;
 
         const imgElement = cells[0].querySelector('img');
         if (!imgElement) continue;
-        imgSrc = `fieldhuide/${imgElement.getAttribute('src')}`;
-        nameKo = cells[1].textContent.trim();
-
+        const imgSrc = `fieldhuide/${imgElement.getAttribute('src')}`;
+        const nameKo = cells[1].textContent.trim();
+        
+        let regionKo, subRegionKo, level, weather, time;
         const getCellText = (index) => cells[index] ? cells[index].textContent.trim() : '';
 
         if (cells.length === 7) {
@@ -167,29 +177,32 @@ const parseHTMLAndCreateGuides = (html, category) => {
             weather = getCellText(5);
             time = getCellText(6);
             lastRegionKo = regionKo;
-        } else if (cells.length === 6) {
+        } else { // cells.length === 6
             regionKo = lastRegionKo;
             subRegionKo = getCellText(2);
             level = getCellText(3);
             weather = getCellText(4);
             time = getCellText(5);
-        } else {
-            continue;
         }
 
         newGuides.push({
             name: { ko: nameKo, en: `[EN] ${nameKo}` },
             region: { ko: regionKo, en: `[EN] ${regionKo}` },
             subRegion: { ko: subRegionKo, en: `[EN] ${subRegionKo}` },
-            level: level,
-            weather: weather,
-            time: time,
-            image: imgSrc,
-            category: category,
-            collection: 0,
+            level: level, weather: weather, time: time, image: imgSrc, category: category, collection: 0,
         });
     }
     return newGuides;
+};
+
+const translateForm = () => {
+    modalTitle.textContent = getTranslation(editingGuideIndex !== null ? 'editGuideTitle' : 'addGuideTitle');
+    modalSubmitBtn.textContent = getTranslation(editingGuideIndex !== null ? 'saveBtn' : 'addGuideBtn');
+
+    addGuideForm.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+        el.placeholder = getTranslation(el.dataset.translateKeyPlaceholder);
+    });
+    addGuideForm.querySelector('[data-translate-key="imageLabel"]').textContent = getTranslation('imageLabel');
 };
 
 const openEditModal = (index) => {
@@ -207,13 +220,9 @@ const openEditModal = (index) => {
     document.getElementById('creature-time').value = guide.time;
     
     creatureImageInput.dataset.url = guide.image;
-    const dropZoneText = imageDropZone.querySelector('p');
-    if (dropZoneText) {
-        dropZoneText.textContent = guide.image ? guide.image.split('/').pop() : getTranslation('imageLabel');
-    }
-
-    modalTitle.textContent = getTranslation('editGuideTitle');
-    modalSubmitBtn.textContent = getTranslation('saveBtn');
+    imageDropZone.querySelector('p').textContent = guide.image ? guide.image.split('/').pop() : getTranslation('imageLabel');
+    
+    translateForm();
     
     if (detailsModal.style.display === 'block') {
         toggleModal(detailsModal, false);
@@ -232,7 +241,12 @@ const deleteGuide = (index) => {
     }
 };
 
-const loadInitialData = async () => {
+const initializeApp = async () => {
+    sizeSlider.value = currentCardSize;
+    filterBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === currentFilter);
+    });
+
     if (guides.length === 0) {
         try {
             const [fishHTML, birdHTML, insectHTML] = await Promise.all([
@@ -251,23 +265,21 @@ const loadInitialData = async () => {
             console.error("Error loading initial data:", error);
         }
     }
-    setLanguage(currentLang);
+    
     updateCardSize();
+    setLanguage(currentLang);
 };
 
-// Event Listeners using Delegation
+// Event Listeners
 pokedex.addEventListener('click', (e) => {
     const card = e.target.closest('.pokemon-card');
     if (!card) return;
-    
     const index = card.dataset.index;
 
     if (e.target.closest('.edit-btn')) {
-        e.stopPropagation();
-        openEditModal(index);
+        e.stopPropagation(); openEditModal(index);
     } else if (e.target.closest('.delete-btn')) {
-        e.stopPropagation();
-        deleteGuide(index);
+        e.stopPropagation(); deleteGuide(index);
     } else {
         showDetailsModal(index);
     }
@@ -279,17 +291,14 @@ guideDetailsContainer.addEventListener('click', (e) => {
     
     if (star && index !== undefined) {
         const rating = parseInt(star.dataset.rating, 10);
-        const currentRating = guides[index].collection || 0;
-        guides[index].collection = rating === currentRating ? 0 : rating;
+        guides[index].collection = (guides[index].collection === rating) ? 0 : rating;
         localStorage.setItem('guides', JSON.stringify(guides));
-        showDetailsModal(index); // Re-render the modal content
-        displayGuides(); // Update the main card list as well
+        showDetailsModal(index); 
+        displayGuides();
     } else if (e.target.closest('.edit-btn')) {
-        const editIndex = e.target.closest('.edit-btn').dataset.index;
-        openEditModal(editIndex);
+        openEditModal(e.target.closest('.edit-btn').dataset.index);
     } else if (e.target.closest('.delete-btn')) {
-        const deleteIndex = e.target.closest('.delete-btn').dataset.index;
-        deleteGuide(deleteIndex);
+        deleteGuide(e.target.closest('.delete-btn').dataset.index);
     }
 });
 
@@ -300,25 +309,21 @@ creatureImageInput.addEventListener('change', (e) => handleImageFile(e.target.fi
 
 ['dragover', 'dragleave', 'drop'].forEach(eventName => {
     imageDropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         if (eventName === 'dragover') imageDropZone.style.borderColor = '#ffc7d1';
-        if (eventName === 'dragleave' || eventName === 'drop') imageDropZone.style.borderColor = '#e0e0e0';
+        if (eventName !== 'dragover') imageDropZone.style.borderColor = '#e0e0e0';
         if (eventName === 'drop') handleImageFile(e.dataTransfer.files[0]);
     });
 });
 
 addGuideBtn.addEventListener('click', () => {
     editingGuideIndex = null;
-    modalTitle.textContent = getTranslation('addGuideTitle');
-    modalSubmitBtn.textContent = getTranslation('addGuideBtn');
+    translateForm();
     toggleModal(addGuideModal, true);
 });
 
 closeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        toggleModal(btn.closest('.modal'), false);
-    });
+    btn.addEventListener('click', () => toggleModal(btn.closest('.modal'), false));
 });
 
 window.addEventListener('click', (e) => {
@@ -378,16 +383,13 @@ filterBtns.forEach(btn => {
             currentFilter = category;
             btn.classList.add('active');
         }
-        
+        saveSettings();
         displayGuides();
     });
 });
 
 langBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const lang = btn.dataset.lang;
-        setLanguage(lang);
-    });
+    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
 });
 
-loadInitialData();
+initializeApp();
