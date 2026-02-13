@@ -14,7 +14,7 @@ const modalSubmitBtn = document.getElementById('modal-submit-btn');
 const guideDetailsContainer = document.getElementById('guide-details');
 
 let guides = JSON.parse(localStorage.getItem('guides')) || [];
-let editingGuideIndex = null;
+let editingGuideIndex = null; // This will be the index in the main `guides` array
 
 // --- Settings Management ---
 const loadSettings = () => {
@@ -49,8 +49,7 @@ const setLanguage = (lang) => {
     saveSettings();
 
     document.querySelectorAll('[data-translate-key]').forEach(el => {
-        const key = el.dataset.translateKey;
-        if(el.closest('#add-guide-form')) return; // Defer form translation to when it opens
+        if(el.closest('#add-guide-form')) return; 
         el.textContent = getTranslation(key, lang);
     });
     
@@ -63,17 +62,17 @@ const setLanguage = (lang) => {
 
 const displayGuides = () => {
     const filteredGuides = currentFilter ? guides.filter(guide => guide.category === currentFilter) : guides;
-    const guidesHTMLString = filteredGuides.map((guide, index) => {
+    const guidesHTMLString = filteredGuides.map((guide) => {
         const name = guide.name[currentLang] || guide.name;
         const region = guide.region[currentLang] || guide.region;
         const subRegion = guide.subRegion[currentLang] || guide.subRegion;
         const collectionStars = Array(5).fill(0).map((_, i) => `<span class="star ${i < (guide.collection || 0) ? 'filled' : ''}" data-rating="${i + 1}">★</span>`).join('');
 
         return `
-        <div class="pokemon-card" data-index="${index}">
+        <div class="pokemon-card" data-id="${guide.id}">
             <div class="card-actions-corner">
-                <button class="card-action-btn edit-btn" data-index="${index}" title="${getTranslation('editBtn')}">✏️</button>
-                <button class="card-action-btn delete-btn" data-index="${index}" title="${getTranslation('deleteBtn')}">🗑️</button>
+                <button class="card-action-btn edit-btn" data-id="${guide.id}" title="${getTranslation('editBtn')}">✏️</button>
+                <button class="card-action-btn delete-btn" data-id="${guide.id}" title="${getTranslation('deleteBtn')}">🗑️</button>
             </div>
             <div class="card-content-wrapper">
                 <div class="card-header">
@@ -107,8 +106,8 @@ const toggleModal = (modal, show) => {
     }
 };
 
-const showDetailsModal = (index) => {
-    const guide = guides[index];
+const showDetailsModal = (id) => {
+    const guide = guides.find(g => g.id == id);
     if (!guide) return;
 
     const name = guide.name[currentLang] || guide.name;
@@ -118,8 +117,8 @@ const showDetailsModal = (index) => {
 
     const detailsHTML = `
         <div id="details-modal-actions">
-            <button class="modal-action-btn edit-btn" data-index="${index}" title="${getTranslation('editBtn')}">✏️</button>
-            <button class="modal-action-btn delete-btn" data-index="${index}" title="${getTranslation('deleteBtn')}">🗑️</button>
+            <button class="modal-action-btn edit-btn" data-id="${guide.id}" title="${getTranslation('editBtn')}">✏️</button>
+            <button class="modal-action-btn delete-btn" data-id="${guide.id}" title="${getTranslation('deleteBtn')}">🗑️</button>
         </div>
         <div id="guide-details-header">
             <img src="${guide.image}" alt="${name}" />
@@ -131,7 +130,7 @@ const showDetailsModal = (index) => {
             <p><strong>${getTranslation('levelLabel')}</strong> ${guide.level}</p>
             <p><strong>${getTranslation('weatherLabel')}</strong> ${guide.weather}</p>
             <p><strong>${getTranslation('timeLabel')}</strong> ${guide.time}</p>
-            <p><strong>${getTranslation('collectionLabel')}</strong> <span class="collection-stars" data-index="${index}">${collectionStars}</span></p>
+            <p><strong>${getTranslation('collectionLabel')}</strong> <span class="collection-stars" data-id="${guide.id}">${collectionStars}</span></p>
         </div>
     `;
     guideDetailsContainer.innerHTML = detailsHTML;
@@ -143,10 +142,7 @@ const handleImageFile = (file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
         creatureImageInput.dataset.url = e.target.result;
-        const dropZoneText = imageDropZone.querySelector('p');
-        if (dropZoneText) {
-            dropZoneText.textContent = file.name;
-        }
+        imageDropZone.querySelector('p').textContent = file.name;
     };
     reader.readAsDataURL(file);
 };
@@ -205,9 +201,10 @@ const translateForm = () => {
     addGuideForm.querySelector('[data-translate-key="imageLabel"]').textContent = getTranslation('imageLabel');
 };
 
-const openEditModal = (index) => {
+const openEditModal = (id) => {
+    const index = guides.findIndex(g => g.id == id);
+    if (index === -1) return;
     const guide = guides[index];
-    if (!guide) return;
 
     editingGuideIndex = index;
 
@@ -230,7 +227,10 @@ const openEditModal = (index) => {
     toggleModal(addGuideModal, true);
 };
 
-const deleteGuide = (index) => {
+const deleteGuide = (id) => {
+    const index = guides.findIndex(g => g.id == id);
+    if (index === -1) return;
+
     if (confirm(getTranslation('deleteConfirm'))) {
         guides.splice(index, 1);
         localStorage.setItem('guides', JSON.stringify(guides));
@@ -242,6 +242,12 @@ const deleteGuide = (index) => {
 };
 
 const initializeApp = async () => {
+    // Migration for old data or first-time setup
+    if (guides.length > 0 && guides[0].id === undefined) {
+        guides.forEach((guide, index) => guide.id = index);
+        localStorage.setItem('guides', JSON.stringify(guides));
+    }
+
     sizeSlider.value = currentCardSize;
     filterBtns.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.category === currentFilter);
@@ -260,6 +266,7 @@ const initializeApp = async () => {
             const insectGuides = parseHTMLAndCreateGuides(insectHTML, 'insect');
 
             guides = [...fishGuides, ...birdGuides, ...insectGuides];
+            guides.forEach((guide, index) => guide.id = index); // Assign IDs
             localStorage.setItem('guides', JSON.stringify(guides));
         } catch (error) {
             console.error("Error loading initial data:", error);
@@ -274,31 +281,43 @@ const initializeApp = async () => {
 pokedex.addEventListener('click', (e) => {
     const card = e.target.closest('.pokemon-card');
     if (!card) return;
-    const index = card.dataset.index;
+    const id = card.dataset.id;
 
     if (e.target.closest('.edit-btn')) {
-        e.stopPropagation(); openEditModal(index);
+        e.stopPropagation(); 
+        openEditModal(id);
     } else if (e.target.closest('.delete-btn')) {
-        e.stopPropagation(); deleteGuide(index);
+        e.stopPropagation(); 
+        deleteGuide(id);
     } else {
-        showDetailsModal(index);
+        showDetailsModal(id);
     }
 });
 
 guideDetailsContainer.addEventListener('click', (e) => {
-    const index = e.target.closest('.collection-stars')?.dataset.index;
+    const editBtn = e.target.closest('.edit-btn');
+    if (editBtn) {
+        openEditModal(editBtn.dataset.id);
+        return;
+    }
+
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (deleteBtn) {
+        deleteGuide(deleteBtn.dataset.id);
+        return;
+    }
+
     const star = e.target.closest('.star');
-    
-    if (star && index !== undefined) {
+    if (star) {
+        const id = star.closest('.collection-stars').dataset.id;
+        const index = guides.findIndex(g => g.id == id);
+        if (index === -1) return;
+
         const rating = parseInt(star.dataset.rating, 10);
         guides[index].collection = (guides[index].collection === rating) ? 0 : rating;
         localStorage.setItem('guides', JSON.stringify(guides));
-        showDetailsModal(index); 
+        showDetailsModal(id);
         displayGuides();
-    } else if (e.target.closest('.edit-btn')) {
-        openEditModal(e.target.closest('.edit-btn').dataset.index);
-    } else if (e.target.closest('.delete-btn')) {
-        deleteGuide(e.target.closest('.delete-btn').dataset.index);
     }
 });
 
@@ -356,6 +375,7 @@ addGuideForm.addEventListener('submit', (e) => {
     } else {
         const newGuide = {
             ...guideData,
+            id: guides.length > 0 ? Math.max(...guides.map(g => g.id)) + 1 : 0,
             name: { en: `[EN] ${nameInput}`, ko: nameInput },
             region: { en: `[EN] ${regionInput}`, ko: regionInput },
             subRegion: { en: `[EN] ${subRegionInput}`, ko: subRegionInput },
